@@ -19,17 +19,17 @@ HarmonyHubClient('192.168.1.106')
               } else {
                 throw new Error('Could not find an activity that sounds like Fernsehen :(')
               }
-            })
+            });
         } else {
-          console.log('Currently on. Turning TV off')
+          console.log('Currently on. Turning TV off');
 
-          return harmonyClient.turnOff()
+          return harmonyClient.turnOff();
         }
       })
       .finally(function () {
-        harmonyClient.end()
+        harmonyClient.end();
       })
   })
   .catch(function (e) {
-    console.log(e)
-  })
+    console.log(e);
+  });
