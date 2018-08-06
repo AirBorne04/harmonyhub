@@ -11,7 +11,7 @@ Which was based upon [@jterraces](https://github.com/jterrace) awesome Harmony
 
 ## Installation
 ```bash
-npm install @harmonyhu/client --save
+npm install @harmonyhub/client --save
 ```
 
 ## Enhancements
