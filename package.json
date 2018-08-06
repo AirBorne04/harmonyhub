@@ -1,10 +1,11 @@
 {
-  "name": "harmonyhubjs-client",
-  "description": "harmonyhubjs-client is a Node.JS library which allows you to interact with your Logitech Harmony Hub.",
+  "name": "@harmonyhub/client",
+  "description": "@harmonyhub/client is a Node.JS library which allows you to interact with your Logitech Harmony Hub.",
   "main": "index.js",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/swissmanu/harmonyhubjs-client.git"
+    "url": "https://github.com/AirBorne04/harmonyhub.git"
   },
   "keywords": [
     "logitech",
@@ -13,29 +14,31 @@
     "remote",
     "api"
   ],
-  "author": "Manuel Alabor <manuel@alabor.me>",
+  "author": "AirBorne04, original authored by Manuel Alabor <manuel@alabor.me>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/swissmanu/harmonyhubjs-client/issues"
+    "url": "https://github.com/AirBorne04/harmonyhub/issues"
   },
   "engines": {
-    "npm": ">=3.0.0"
+    "npm": ">=4.0.0"
   },
   "dependencies": {
-    "debug": "^2.1.0",
-    "node-xmpp-client": "3.0.0",
-    "node-xmpp-stanza": "1.1.0",
-    "q": "^1.1.2",
-    "request": "^2.48.0",
-    "ltx": "https://github.com/swissmanu/ltx.git#cdata-for-ltx-parser"
+    "debug": "^3.1.0",
+    "node-xmpp-client": "^3.2.0",
+    "node-xmpp-stanza": "^1.1.1",
+    "request": "^2.48.0"
   },
   "devDependencies": {
     "cz-conventional-changelog": "^1.1.5",
-    "standard": "^5.4.1",
-    "semantic-release": "^4.3.5"
+    "semantic-release": "^15.9.3",
+    "standard": "^11.0.1"
   },
   "scripts": {
     "test": "standard",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "nom version major",
+    "publish": "npm publish --access=public",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "config": {

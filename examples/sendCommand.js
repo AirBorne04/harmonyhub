@@ -1,30 +1,31 @@
-var HarmonyHubClient = require('../index')
+var HarmonyHubClient = require('../index');
 
 HarmonyHubClient('192.168.1.12')
   .then(function (harmonyClient) {
+    console.log("harmony client " + harmonyClient);
     return harmonyClient.getAvailableCommands()
       .then(function (commands) {
         // Look for the first device and pick its "power" control group, pick
         // there the "poweron" function and trigger it:
-        var device = commands.device[0]
+        var device = commands.device[0];
         var powerControls = device.controlGroup
             .filter(function (group) { return group.name.toLowerCase() === 'power' })
-            .pop()
+            .pop();
         var powerOnFunction = powerControls['function']
             .filter(function (action) { return action.name.toLowerCase() === 'poweron' })
-            .pop()
+            .pop();
 
         if (powerOnFunction) {
-          var encodedAction = powerOnFunction.action.replace(/\:/g, '::')
-          return harmonyClient.send('holdAction', 'action=' + encodedAction + ':status=press')
+          var encodedAction = powerOnFunction.action.replace(/\:/g, '::');
+          return harmonyClient.send('holdAction', 'action=' + encodedAction + ':status=press');
         } else {
-          throw new Error('could not find poweron function of first device :(')
+          throw new Error('could not find poweron function of first device :(');
         }
       })
       .finally(function () {
-        harmonyClient.end()
-      })
+        harmonyClient.end();
+      });
   })
   .catch(function (e) {
-    console.log(e)
-  })
+    console.log(e);
+  });
