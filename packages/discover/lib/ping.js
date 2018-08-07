@@ -16,7 +16,7 @@ class Ping {
     this.messageBuffer = new Buffer(this.message);
 
     // Prepare the socket so it can emit broadcasts:
-    this.socket.bind(this.port, function () {
+    this.socket.bind(this.port, () => {
       this.setBroadcast(true);
     });
 
@@ -32,18 +32,18 @@ class Ping {
   emit () {
     debug('emit()');
       
-    this.socket.send(this.messageBuffer, 0, this.message.length, this.port, this.address
-      , function (err) {
+    this.socket.send(this.messageBuffer, 0, this.message.length, this.port, this.address,
+      (err) => {
         if (err) {
           debug('error emitting ping. stopping now :( (' + err + ')');
           this.stop();
         }
-      })
+      });
   }
 
   start () {
     debug('start()');
-    this.intervalToken = setInterval(emit, this.interval);
+    this.intervalToken = setInterval(this.emit, this.interval);
   }
 
   stop () {

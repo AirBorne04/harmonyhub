@@ -1,5 +1,6 @@
 var debug = require('debug')('harmonyhub:client:harmonyclient');
 var xmppUtil = require('./util');
+const { EventEmitter } = require("events");
 
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
@@ -8,7 +9,7 @@ var xmppUtil = require('./util');
  * @constructor
  */
 
-class HarmonyClient {
+class HarmonyClient extends EventEmitter {
   constructor(xmppClient) {
 
     debug('create new harmony client');
@@ -39,8 +40,7 @@ class HarmonyClient {
     // Check for state digest:
     var event = stanza.getChild('event');
     if (event && event.attr('type') === 'connect.stateDigest?notify') {
-      console.log("state digest");
-      onStateDigest.call(self, JSON.parse(event.getText()));
+      onStateDigest.call(this, JSON.parse(event.getText()));
     }
 
     // Check for queued response handlers:
@@ -48,8 +48,8 @@ class HarmonyClient {
       if (responseHandler.canHandleStanza(stanza)) {
         debug('received response stanza for queued response handler');
 
-        var response = stanza.getChildText('oa');
-        var decodedResponse;
+        var response = stanza.getChildText('oa'),
+            decodedResponse;
 
         if (responseHandler.responseType === 'json') {
           decodedResponse = JSON.parse(response);
@@ -82,8 +82,7 @@ class HarmonyClient {
 
     return this.request('getCurrentActivity')
       .then(function (response) {
-        var result = response.result
-        return result
+        return response.result;
       });
   }
 
@@ -113,11 +112,11 @@ class HarmonyClient {
 
     return this.request('startactivity', body, 'encoded', function (stanza) {
       // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
-      var event = stanza.getChild('event');
-      var canHandleStanza = false;
+      var event = stanza.getChild('event'),
+          canHandleStanza = false;
 
       if (event && event.attr('type') === 'connect.stateDigest?notify') {
-        var digest = JSON.parse(event.getText())
+        var digest = JSON.parse(event.getText());
         if (activityId === '-1' && digest.activityId === activityId && digest.activityStatus === 0) {
           canHandleStanza = true;
         } else if (activityId !== '-1' && digest.activityId === activityId && digest.activityStatus === 2) {

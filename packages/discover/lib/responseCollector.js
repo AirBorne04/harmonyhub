@@ -1,45 +1,42 @@
-var debug = require('debug')('harmonyhubjs:discover:responsecollector')
-var util = require('util')
-var EventEmitter = require('events').EventEmitter
+var debug = require('debug')('harmonyhubjs:discover:responsecollector');
+const { EventEmitter } = require('events');
 var net = require('net')
 
-function ResponseCollector (port) {
-  debug('ResponseCollector(' + port + ')')
+class ResponseCollector extends EventEmitter {
+  constructor (port) {
+    debug('ResponseCollector(' + port + ')');
 
-  var self = this
-  this.port = port
-  EventEmitter.call(self)
-}
-util.inherits(ResponseCollector, EventEmitter)
+    this.port = port;
+  }
 
-ResponseCollector.prototype.start = function start () {
-  debug('start()')
+  start () {
+    debug('start()')
 
-  var self = this
-  self.server = net.createServer(function (socket) {
-    debug('handle new connection')
+    this.server = net.createServer((socket) => {
+      debug('handle new connection');
 
-    var buffer = ''
+      var buffer = '';
 
-    socket.on('data', function (data) {
-      debug('received data chunk')
-      buffer += data.toString()
-    })
+      socket.on('data', (data) => {
+        debug('received data chunk');
+        buffer += data.toString();
+      });
 
-    socket.on('end', function () {
-      debug('connection closed. emitting data.')
-      self.emit('response', buffer)
-    })
-  }).listen(self.port)
-}
+      socket.on('end', () => {
+        debug('connection closed. emitting data.');
+        self.emit('response', buffer);
+      })
+    }).listen(self.port);
+  }
 
-ResponseCollector.prototype.stop = function stop () {
-  debug('stop()')
+  stop () {
+    debug('stop()');
 
-  if (this.server) {
-    this.server.close()
-  } else {
-    debug('not running')
+    if (this.server) {
+      this.server.close();
+    } else {
+      debug('not running');
+    }
   }
 }
 
