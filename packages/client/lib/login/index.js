@@ -1,4 +1,4 @@
-var debug = require('debug')('harmonyhubjs:client:login');
+var debug = require('debug')('harmonyhub:client:login');
 var loginToHub = require('./hub');
 
 /** Function: login

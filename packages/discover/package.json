@@ -1,0 +1,36 @@
+{
+  "name": "@harmonyhub/discover",
+  "description": "Discover available Logitech Harmony Hubs in the current network.",
+  "keywords": [
+    "logitech",
+    "harmony",
+    "hub",
+    "remote",
+    "api",
+    "discover",
+    "search"
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AirBorne04/harmonyhub.git"
+  },
+  "author": "AirBorne04",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AirBorne04/harmonyhub/issues"
+  },
+  "scripts": {
+    "test": "standard",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  },
+  "homepage": "https://github.com/AirBorne04/harmonyhub",
+  "dependencies": {
+    "debug": "^3.1.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^15.9.5",
+    "standard": "^11.0.1"
+  },
+  "version": "1.0.0"
+}
