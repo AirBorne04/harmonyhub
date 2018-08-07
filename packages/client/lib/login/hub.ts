@@ -1,6 +1,8 @@
-var debug = require('debug')('harmonyhub:client:login:hub');
-var Client = require('node-xmpp-client');
-var util = require('../util');
+import * as logger from "debug"
+var debug = logger('harmonyhub:client:login:hub');
+
+import * as Client from 'node-xmpp-client';
+import { default as util } from '../util';
 
 /** PrivateFunction: getIdentity
  * Logs in to a Harmony hub as a guest and uses the userAuthToken from logitech's
@@ -14,7 +16,7 @@ var util = require('../util');
  * Returns:
  *     (Promise) - The resolved promise passes the retrieved identity token.
  */
-function getIdentity(hubhost, hubport) {
+async function getIdentity(hubhost, hubport) {
   debug('retrieve identity by logging in as guest');
 
   // guest@x.com / guest
@@ -54,7 +56,7 @@ function getIdentity(hubhost, hubport) {
 
       if (stanza.attrs.id === iqId.toString()) {
         var body = stanza.getChildText('oa');
-        var response = util.decodeColonSeparatedResponse(body);
+        var response:any = util.decodeColonSeparatedResponse(body);
 
         if (response.identity && response.identity !== undefined) {
           debug('received identity token: ' + response.identity);

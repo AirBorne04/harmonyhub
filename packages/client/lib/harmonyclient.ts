@@ -1,6 +1,9 @@
-var debug = require('debug')('harmonyhub:client:harmonyclient');
-var xmppUtil = require('./util');
-const { EventEmitter } = require("events");
+import * as logger from 'debug';
+
+var debug = logger('harmonyhub:client:harmonyclient');
+
+import { default as xmppUtil } from './util';
+import { EventEmitter } from "events";
 
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
@@ -9,8 +12,13 @@ const { EventEmitter } = require("events");
  * @constructor
  */
 
-class HarmonyClient extends EventEmitter {
+export class HarmonyClient extends EventEmitter {
+
+  _xmppClient: any;
+  _responseHandlerQueue: Array<any>;
+  
   constructor(xmppClient) {
+    super();
 
     debug('create new harmony client');
 
@@ -23,7 +31,7 @@ class HarmonyClient extends EventEmitter {
       this.startActivity, this.getAvailableCommands,
       this.request, this.send, this.end
     ].forEach(
-      (func) => {
+      (func: any) => {
         this[func.name] = func.bind(this);
       }
     );
@@ -40,7 +48,7 @@ class HarmonyClient extends EventEmitter {
     // Check for state digest:
     var event = stanza.getChild('event');
     if (event && event.attr('type') === 'connect.stateDigest?notify') {
-      onStateDigest.call(this, JSON.parse(event.getText()));
+      this.onStateDigest.call(this, JSON.parse(event.getText()));
     }
 
     // Check for queued response handlers:
@@ -77,25 +85,23 @@ class HarmonyClient extends EventEmitter {
    *
    * @returns Promise
    */
-  getCurrentActivity() {
+  async getCurrentActivity() {
     debug('retrieve current activity');
 
     return this.request('getCurrentActivity')
-      .then(function (response) {
+      .then(function (response: any) {
         return response.result;
       });
   }
 
   /**
    * Retrieves a list with all available activities.
-   *
-   * @returns Promise
    */
-  getActivities() {
+  async getActivities() {
     debug('retrieve activities')
 
     return this.getAvailableCommands()
-      .then(function (availableCommands) {
+      .then(function (availableCommands: any) {
         return availableCommands.activity;
       });
   }
@@ -106,11 +112,11 @@ class HarmonyClient extends EventEmitter {
    * @param activityId
    * @returns Promise
    */
-  startActivity(activityId) {
+  async startActivity(activityId) {
     var timestamp = new Date().getTime();
     var body = 'activityId=' + activityId + ':timestamp=' + timestamp;
 
-    return this.request('startactivity', body, 'encoded', function (stanza) {
+    return this.request('startactivity', body, 'encoded', (stanza) => {
       // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
       var event = stanza.getChild('event'),
           canHandleStanza = false;
@@ -129,10 +135,8 @@ class HarmonyClient extends EventEmitter {
 
   /**
    * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
-   *
-   * @returns Promise
    */
-  turnOff() {
+  async turnOff() {
     debug('turn off');
     return this.startActivity('-1');
   }
@@ -140,10 +144,8 @@ class HarmonyClient extends EventEmitter {
   /**
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
-   *
-   * @returns Promise
    */
-  isOff() {
+  async isOff() {
     debug('check if turned off');
 
     return this.getCurrentActivity()
@@ -157,10 +159,8 @@ class HarmonyClient extends EventEmitter {
 
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
-   *
-   * @returns Promise
    */
-  getAvailableCommands() {
+  async getAvailableCommands() {
     debug('retrieve available commands');
 
     return this.request('config', undefined, 'json')
@@ -207,17 +207,16 @@ class HarmonyClient extends EventEmitter {
    * @param body
    * @param expectedResponseType
    * @param canHandleStanzaPredicate
-   * @returns Promise
    */
-  request(command, body, expectedResponseType, canHandleStanzaPredicate) {
+  async request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean) {
     debug('request with command "' + command + '" with body ' + body);
     
     var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
-      var iq = buildCommandIqStanza(command, body);
-      var id = iq.attr('id');
+      const iq = this.buildCommandIqStanza(command, body),
+            id: string = iq.attr('id');
 
       expectedResponseType = expectedResponseType || 'encoded';
-      canHandleStanzaPredicate = canHandleStanzaPredicate || defaultCanHandleStanzaPredicate.bind(null, id);
+      canHandleStanzaPredicate = canHandleStanzaPredicate || (stanza => this.defaultCanHandleStanzaPredicate(id, stanza));
 
       resolveCallback = resolve;
       rejectCallback = reject;
@@ -246,8 +245,8 @@ class HarmonyClient extends EventEmitter {
    */
   send(command, body) {
     debug('send command "' + command + '" with body ' + body);
-    this._xmppClient.send(buildCommandIqStanza(command, body));
-    return Promise.resolve();
+    this._xmppClient.send(this.buildCommandIqStanza(command, body));
+    return;
   }
 
   /**
@@ -257,8 +256,8 @@ class HarmonyClient extends EventEmitter {
   end() {
     debug('close harmony client');
     this._xmppClient.end();
-    return Promise.resolve();
+    return;
   }
 }
 
-module.exports = HarmonyClient;
+export default HarmonyClient;
