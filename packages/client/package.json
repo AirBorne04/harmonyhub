@@ -1,8 +1,8 @@
 {
   "name": "@harmonyhub/client",
   "description": "@harmonyhub/client is a Node.JS library which allows you to interact with your Logitech Harmony Hub.",
-  "main": "/dist/index.js",
-  "types": "/dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "version": "1.0.1",
   "repository": {
     "type": "git",
