@@ -8,7 +8,7 @@ function deserializeResponse(response) {
   var pairs = {};
 
   response.split(';')
-    .forEach(function (rawPair) {
+    .forEach((rawPair) => {
       var splitted = rawPair.split(':')
       pairs[splitted[0]] = splitted[1]
     });
@@ -78,7 +78,7 @@ class Explorer extends EventEmitter {
 
     var now = new Date();
 
-    Object.keys(this.knownHubs).forEach(function (hubUuid) {
+    Object.keys(this.knownHubs).forEach((hubUuid) => {
       var hub = this.knownHubs[hubUuid];
       var diff = now - hub.lastSeen;
 
