@@ -61,4 +61,8 @@ This example connects to a Harmony hub available on the IP `192.168.1.200`. As s
 
 ```bash
 $ DEBUG=harmonyhub:client* node myharmonyjsapp.js
+<<<<<<< HEAD:packages/client/README.md
 ```
+=======
+```
+>>>>>>> client readme update:packages/client/README.md
