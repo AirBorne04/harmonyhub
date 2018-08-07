@@ -17,9 +17,9 @@ var loginToHub = require('./hub');
  *     (Promise) - When resolved, the promise passes a prepared XMPP client,
  *                   ready to communicate with the Harmony hub.
  */
-function login (hubhost, hubport) {
+export async function login(hubhost, hubport) {
   debug('login on hub ' + hubhost + (hubport ? ':' + hubport : ''));
   return loginToHub(hubhost, hubport);
 }
 
-module.exports = login;
+export default login;

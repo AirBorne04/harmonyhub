@@ -1,5 +1,7 @@
-var debug = require('debug')('harmonyhub:client:login:auth');
-var request = require('request');
+import * as request from 'request';
+import * as logger from "debug";
+
+var debug = logger('harmonyhub:client:login:auth');
 var logitechUrl = 'https://svcs.myharmony.com/CompositeSecurityServices/Security.svc/json/GetUserAuthToken';
 
 /** Function: getUserAuthToken
@@ -13,7 +15,7 @@ var logitechUrl = 'https://svcs.myharmony.com/CompositeSecurityServices/Security
  * Returns:
  *     (Promise) - When resolved, passes the userAuthToken.
  */
-function getUserAuthToken (email, password) {
+export async function getUserAuthToken (email, password) {
   debug('retrieve userAuthToken from logitech for email ' + email);
 
   return new Promise((resolve, reject) => {
@@ -50,4 +52,4 @@ function getUserAuthToken (email, password) {
   });
 }
 
-module.exports = getUserAuthToken
+export default getUserAuthToken;
