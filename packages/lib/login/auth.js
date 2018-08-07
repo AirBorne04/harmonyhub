@@ -1,4 +1,4 @@
-var debug = require('debug')('harmonyhubjs:client:login:auth');
+var debug = require('debug')('harmonyhub:client:login:auth');
 var request = require('request');
 var logitechUrl = 'https://svcs.myharmony.com/CompositeSecurityServices/Security.svc/json/GetUserAuthToken';
 

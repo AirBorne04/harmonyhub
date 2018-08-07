@@ -1,4 +1,4 @@
-var debug = require('debug')('harmonyhubjs:client:login:hub');
+var debug = require('debug')('harmonyhub:client:login:hub');
 var Client = require('node-xmpp-client');
 var util = require('../util');
 
