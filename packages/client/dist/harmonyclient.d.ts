@@ -2,7 +2,13 @@
 import { EventEmitter } from "events";
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
+<<<<<<< HEAD
  * @param xmppClient
+=======
+ *
+ * @param xmppClient
+ * @constructor
+>>>>>>> converted project into typescript
  */
 export declare class HarmonyClient extends EventEmitter {
     _xmppClient: any;
@@ -30,11 +36,19 @@ export declare class HarmonyClient extends EventEmitter {
      * @param activityId
      * @returns Promise
      */
+<<<<<<< HEAD
     startActivity(activityId: any): Promise<Object>;
     /**
      * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
      */
     turnOff(): Promise<Object>;
+=======
+    startActivity(activityId: any): Promise<{}>;
+    /**
+     * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
+     */
+    turnOff(): Promise<{}>;
+>>>>>>> converted project into typescript
     /**
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
@@ -43,7 +57,11 @@ export declare class HarmonyClient extends EventEmitter {
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
+<<<<<<< HEAD
     getAvailableCommands(): Promise<Object>;
+=======
+    getAvailableCommands(): Promise<{}>;
+>>>>>>> converted project into typescript
     /**
      * Builds an IQ stanza containing a specific command with given body, ready to send to the hub.
      *
@@ -51,8 +69,13 @@ export declare class HarmonyClient extends EventEmitter {
      * @param body
      * @returns {Stanza}
      */
+<<<<<<< HEAD
     buildCommandIqStanza(command: string, body: string): any;
     defaultCanHandleStanzaPredicate(awaitedId: string, stanza: any): boolean;
+=======
+    buildCommandIqStanza(command: any, body: any): any;
+    defaultCanHandleStanzaPredicate(awaitedId: any, stanza: any): boolean;
+>>>>>>> converted project into typescript
     /**
      * Sends a command with the given body to the hub. The returned promise gets resolved as soon as a response for this
      * very request arrives.
@@ -69,7 +92,11 @@ export declare class HarmonyClient extends EventEmitter {
      * @param expectedResponseType
      * @param canHandleStanzaPredicate
      */
+<<<<<<< HEAD
     request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<Object>;
+=======
+    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<{}>;
+>>>>>>> converted project into typescript
     /**
      * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
      * not expect any specific response from the hub.
