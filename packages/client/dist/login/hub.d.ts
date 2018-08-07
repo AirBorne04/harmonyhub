@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /** Function: loginToHub
  * Uses a guest account to log into the hub defined by the host
  * and port.
@@ -7,6 +7,3 @@
  */
 export declare function loginToHub(hubhost: string, hubport: number): Promise<{}>;
 export default loginToHub;
-=======
-export {};
->>>>>>> converted project into typescript
