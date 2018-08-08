@@ -2,8 +2,8 @@
 
 `harmonyhub` is a Node.JS library which wants to consolidate functions around interaction with a Logitech Harmony Hub from various different libraries from the community (the original authors and repos can be found in the Readme of each of the contained packages).
 The library contains the following packages:
-1. client (interacting with the hub)
-2. discover (find a hub in your network)
+1. [client](/packages/client) (interacting with the hub)
+2. [discover](/packages/discover) (find a hub in your network)
 
 ## Installation
 ```bash
