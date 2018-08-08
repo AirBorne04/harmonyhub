@@ -24,7 +24,7 @@ Enhancements over the harmonyhub-client package are the following
 
 ## Usage
 ```javascript
-var harmony = require('@harmonyhub/client');
+var harmony = require('@harmonyhub/client').getHarmonyClient;
 
 harmony('192.168.1.200')
   .then(function(harmonyClient) {
