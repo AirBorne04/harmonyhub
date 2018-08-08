@@ -10,25 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const request = require("request");
 const logger = require("debug");
-var debug = logger('harmonyhub:client:login:auth');
-var logitechUrl = 'https://svcs.myharmony.com/CompositeSecurityServices/Security.svc/json/GetUserAuthToken';
+var debug = logger("harmonyhub:client:login:auth");
+var logitechUrl = "https://svcs.myharmony.com/CompositeSecurityServices/Security.svc/json/GetUserAuthToken";
 /** Function: getUserAuthToken
  * Connects to Logitechs web service to retrieve a userAuthToken. This token
  * then can be used to login to a Harmony hub as guest.
- *
- * Parameters:
- *     (String) email - E-mail address of a Harmony account
- *     (String) password - Password of a Harmony account
- *
- * Returns:
- *     (Promise) - When resolved, passes the userAuthToken.
  */
 function getUserAuthToken(email, password) {
     return __awaiter(this, void 0, void 0, function* () {
-        debug('retrieve userAuthToken from logitech for email ' + email);
+        debug("retrieve userAuthToken from logitech for email " + email);
         return new Promise((resolve, reject) => {
             request.post({
-                method: 'post',
+                method: "post",
                 url: logitechUrl,
                 json: true,
                 body: {
@@ -38,19 +31,19 @@ function getUserAuthToken(email, password) {
             }, function (error, response, body) {
                 if (!error) {
                     if (!body.ErrorCode) {
-                        debug('userAuthToken retrieved');
+                        debug("userAuthToken retrieved");
                         var authToken = body.GetUserAuthTokenResult.UserAuthToken;
-                        debug('authToken: ' + authToken);
+                        debug("authToken: " + authToken);
                         resolve(authToken);
                     }
                     else {
-                        debug('failed to retrieve userAuthToken');
-                        reject(new Error('Could not retrieve userAuthToken via Logitech! ' +
-                            'Please check email & password.'));
+                        debug("failed to retrieve userAuthToken");
+                        reject(new Error("Could not retrieve userAuthToken via Logitech! " +
+                            "Please check email & password."));
                     }
                 }
                 else {
-                    debug('HTTP error: ' + error);
+                    debug("HTTP error: " + error);
                     reject(error);
                 }
             });

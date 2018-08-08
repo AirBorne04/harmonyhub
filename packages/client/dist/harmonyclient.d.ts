@@ -2,9 +2,7 @@
 import { EventEmitter } from "events";
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
- *
  * @param xmppClient
- * @constructor
  */
 export declare class HarmonyClient extends EventEmitter {
     _xmppClient: any;
@@ -32,11 +30,11 @@ export declare class HarmonyClient extends EventEmitter {
      * @param activityId
      * @returns Promise
      */
-    startActivity(activityId: any): Promise<{}>;
+    startActivity(activityId: any): Promise<Object>;
     /**
      * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
      */
-    turnOff(): Promise<{}>;
+    turnOff(): Promise<Object>;
     /**
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
@@ -45,7 +43,7 @@ export declare class HarmonyClient extends EventEmitter {
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
-    getAvailableCommands(): Promise<{}>;
+    getAvailableCommands(): Promise<Object>;
     /**
      * Builds an IQ stanza containing a specific command with given body, ready to send to the hub.
      *
@@ -53,8 +51,8 @@ export declare class HarmonyClient extends EventEmitter {
      * @param body
      * @returns {Stanza}
      */
-    buildCommandIqStanza(command: any, body: any): any;
-    defaultCanHandleStanzaPredicate(awaitedId: any, stanza: any): boolean;
+    buildCommandIqStanza(command: string, body: string): any;
+    defaultCanHandleStanzaPredicate(awaitedId: string, stanza: any): boolean;
     /**
      * Sends a command with the given body to the hub. The returned promise gets resolved as soon as a response for this
      * very request arrives.
@@ -71,7 +69,7 @@ export declare class HarmonyClient extends EventEmitter {
      * @param expectedResponseType
      * @param canHandleStanzaPredicate
      */
-    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<{}>;
+    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<Object>;
     /**
      * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
      * not expect any specific response from the hub.

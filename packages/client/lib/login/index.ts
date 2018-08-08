@@ -1,23 +1,15 @@
-var debug = require('debug')('harmonyhub:client:login');
-var loginToHub = require('./hub');
+import * as logger from "debug";
+var debug = logger("harmonyhub:client:login");
+
+import { loginToHub } from "./hub";
 
 /** Function: login
- * Retrieves a UserAuthToken using a valid Harmony account and logs in to a
+ * Retrieves a UserAuthToken using a guest Harmony account and logs into a
  * local Harmony hub. If everything runs fine, the returned promise resolves by
- * passing a logged in XMPP client which provied communications to the Hamrony
+ * passing a logged in XMPP client which provides communication to the Hamrony
  * hub.
- *
- * Parameters:
- *     (String) email - E-mail address of a Harmony account
- *     (String) password - Password of a Harmony account
- *     (String) hubhost - Hostname/IP of the Harmony hub to login to.
- *     (int) hubport - Optional. Port of the Harmony hub to login to.
- *
- * Returns:
- *     (Promise) - When resolved, the promise passes a prepared XMPP client,
- *                   ready to communicate with the Harmony hub.
  */
-export async function login(hubhost, hubport) {
+export function login(hubhost: string, hubport: number): Promise<{}> {
   debug('login on hub ' + hubhost + (hubport ? ':' + hubport : ''));
   return loginToHub(hubhost, hubport);
 }
