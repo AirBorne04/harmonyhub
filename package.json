@@ -1,0 +1,33 @@
+{
+  "name": "harmonyhub",
+  "version": "1.0.1",
+  "description": "library for interacting with the harmony hub",
+  "main": "index.js",
+  "dependencies": {
+    
+  },
+  "devDependencies": {
+    "typescript": "^2.7"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:client": "cd packages/client && tsc",
+    "build:discover": "cd packages/discover && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AirBorne04/harmonyhub.git"
+  },
+  "keywords": [
+    "harmony",
+    "harmonyhub",
+    "api",
+    "xmpp"
+  ],
+  "author": "Daniel Freese",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AirBorne04/harmonyhub/issues"
+  },
+  "homepage": "https://github.com/AirBorne04/harmonyhub#readme"
+}

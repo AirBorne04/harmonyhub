@@ -1,7 +1,8 @@
-var login = require('./login');
+import { login } from './login';
 import { HarmonyClient } from './harmonyclient';
 
-export function getHarmonyClient(hubhost, hubport): HarmonyClient {
+export async function getHarmonyClient(hubhost: string, hubport: number): Promise<HarmonyClient> {
+  
   return login(hubhost, hubport)
     .then(xmppClient => {
       return new HarmonyClient(xmppClient);
