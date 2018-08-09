@@ -69,7 +69,7 @@ export declare class HarmonyClient extends EventEmitter {
      * @param expectedResponseType
      * @param canHandleStanzaPredicate
      */
-    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<Object>;
+    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<Object>;
     /**
      * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
      * not expect any specific response from the hub.

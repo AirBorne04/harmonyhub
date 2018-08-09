@@ -1,4 +1,3 @@
-
 /** Function: loginToHub
  * Uses a guest account to log into the hub defined by the host
  * and port.
