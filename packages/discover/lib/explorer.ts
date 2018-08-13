@@ -35,8 +35,8 @@ export class Explorer extends EventEmitter {
   constructor(port: number, pingOptions) {
     super();
 
-    this.port = port || 5222;
-
+    this.port = port;
+    
     debug("Explorer(" + this.port + ")");
 
     this.ping = new Ping(this.port, pingOptions);

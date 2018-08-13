@@ -22,12 +22,11 @@
     "url": "https://github.com/AirBorne04/harmonyhub/issues"
   },
   "scripts": {
-    "postinstall": "npx tsc",
     "build:watch": "tsc --watch",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "nom version major",
-    "publish": "npm publish --access=public"
+    "publish:public": "npm publish --access=public"
   },
   "homepage": "https://github.com/AirBorne04/harmonyhub",
   "dependencies": {
@@ -37,5 +36,5 @@
     "@types/debug": "0.0.30",
     "@types/node": "^10.5.7"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

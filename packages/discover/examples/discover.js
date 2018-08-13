@@ -1,4 +1,5 @@
-const discover = new (require('../lib/'))(5222);
+const Explorer = require('../lib/');
+const discover = new Explorer(5222);
 
 discover.on('online', function (hub) {
   console.log('discovered ' + hub.ip);

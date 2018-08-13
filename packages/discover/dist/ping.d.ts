@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import * as dgram from "dgram";
 export declare class PingOptions {
-    port: number;
-    address: string;
-    interval: number;
+    port?: number;
+    address?: string | Array<string>;
+    interval?: number;
 }
 export declare class Ping {
     socket: dgram.Socket;
@@ -11,7 +11,7 @@ export declare class Ping {
     messageBuffer: Buffer;
     intervalToken: NodeJS.Timer;
     options: PingOptions;
-    constructor(portToAnnounce: number, options: PingOptions);
+    constructor(portToAnnounce: number, options?: PingOptions);
     emit(): void;
     start(): void;
     stop(): void;

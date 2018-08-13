@@ -23,7 +23,7 @@ class Explorer extends events_1.EventEmitter {
     constructor(port, pingOptions) {
         super();
         this.knownHubs = new Map();
-        this.port = port || 5222;
+        this.port = port;
         debug("Explorer(" + this.port + ")");
         this.ping = new ping_1.Ping(this.port, pingOptions);
         [

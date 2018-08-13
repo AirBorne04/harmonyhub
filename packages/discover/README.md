@@ -2,6 +2,7 @@
 
 `@harmonyhub/discover` is a package which detects available Logitech Harmony hubs in the local network.
 
+It is based upon [@swissmanu](https://github.com/swissmanu) harmonyhubjs-discover
 
 ## Installation
 
@@ -9,11 +10,20 @@
 npm install @harmonyhub/discover
 ```
 
+## Enhancements
+
+Enhancements over the harmonyhubjs-discover package are the following
+* rewrite to class style
+* replacement of Q library with native nodejs Promises (dep reduction)
+* update of dependencies to newer packages (0 security issues by npm audit)
+* fix of issue of [non closing socket](https://github.com/swissmanu/harmonyhubjs-discover/issues/5)
+* fix the issue of [multiple clients](https://github.com/swissmanu/harmonyhubjs-discover/issues/4)
+
 ## Usage
 
 ```javascript
-const HarmonyHubDiscover = require('harmonyhub-discover');
-const discover = new HarmonyHubDiscover(61991);
+const Explorer = require('@harmonyhub/discover').Explorer;
+const discover = new Explorer(61991);
 
 discover.on('online', function(hub) {
 	// Triggered when a new hub was found
@@ -38,8 +48,8 @@ discover.on('update', function(hubs) {
 // Look for hubs:
 discover.start();
 
-// Stop looking for hubs again:
-// discover.stop()
+// Stop looking for hubs again and close the app:
+setTimeout(discover.stop, 5000);
 ```
 
 ### Further Examples

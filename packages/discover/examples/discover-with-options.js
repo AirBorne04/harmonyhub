@@ -1,7 +1,8 @@
-// You can pass optional options to harmonyhubjs-discover.
+// You can pass optional options to discover.
 // The values stated below after the description are the default values.
 
-const discover = new (require('../lib/'))(61991, {
+const Explorer = require('../lib/');
+const discover = new Explorer(61991, {
   // Having multiple network interfaces on a system, you may need to specify the broadcast address to the subnet your
   // hub is connected to.
   // Example: Hub is within subnet 192.168.1.0/24, use address "192.168.1.255".
