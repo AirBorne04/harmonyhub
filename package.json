@@ -1,16 +1,19 @@
 {
   "name": "harmonyhub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
     "typescript": "^2.7"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && mocha",
     "build:client": "cd packages/client && tsc",
     "build:discover": "cd packages/discover && tsc",
+    "build": "npm run build:discover && npm run build:client",
     "postinstall": "(cd packages/client/ && npm install) && (cd ../../packages/discover/ && npm install)"
   },
   "repository": {

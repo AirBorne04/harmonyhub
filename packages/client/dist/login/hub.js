@@ -79,7 +79,8 @@ function loginWithIdentity(identity, hubhost, hubport) {
             password: password,
             host: hubhost,
             port: hubport,
-            disallowTLS: true
+            disallowTLS: true,
+            reconnect: true
         });
         // xmppClientNew = new ClientNew();
         xmppClient.on("error", function (e) {

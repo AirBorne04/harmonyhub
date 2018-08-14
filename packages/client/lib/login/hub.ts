@@ -96,7 +96,8 @@ function loginWithIdentity(identity: string, hubhost: string, hubport: number): 
         password: password,
         host: hubhost,
         port: hubport,
-        disallowTLS: true
+        disallowTLS: true,
+        reconnect: true
       });
       // xmppClientNew = new ClientNew();
 
