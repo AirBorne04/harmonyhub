@@ -13,9 +13,6 @@ import { default as util } from "../util";
  *     (String) hubhost - Hostname/IP of the Harmony hub to connect.
  *     (int) hubport - Optional. Port of the Harmony hub to connect. By default,
  *                     this is set to 5222.
- *
- * Returns:
- *     (Promise) - The resolved promise passes the retrieved identity token.
  */
 function getIdentity(hubhost: string, hubport: number): Promise<string> {
   debug("retrieve identity by logging in as guest");
@@ -29,8 +26,7 @@ function getIdentity(hubhost: string, hubport: number): Promise<string> {
         password: "guest",
         host: hubhost,
         port: hubport,
-        disallowTLS: true,
-        reconnect: true
+        disallowTLS: true
       });
 
     xmppClient.on("online", function () {

@@ -1,0 +1,31 @@
+{
+  "name": "homebridge-harmony-hub",
+  "description": "Logitech Harmony Hub plugin for HomeBridge",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AirBorne04/harmonyhub.git"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "ISC",
+  "preferGlobal": true,
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "engines": {
+    "node": ">=4",
+    "homebridge": ">=0.3.1"
+  },
+  "dependencies": {
+    "@harmonyhub/client": "^1.0.3",
+    "@harmonyhub/discover": "^1.0.3",
+    "debug": "^2.2.0",
+    "lodash": "^4.6"
+  },
+  "devDependencies": {
+    "autobind-decorator": "^2.1.0",
+    "@types/debug": "0.0.30",
+    "@types/node": "^10.5.7"
+  }
+}

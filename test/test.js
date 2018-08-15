@@ -77,7 +77,7 @@ describe("discover", function() {
     }
 
     // test start and stop change of pinger state
-    expect(pinger.socket).to.be.undefined;
+    expect(pinger._socket).to.be.undefined;
     expect(pinger.intervalToken).to.be.undefined;
     pinger.start();
     expect(pinger.socket).to.be.an("object");

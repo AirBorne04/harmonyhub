@@ -1,13 +1,12 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 var debug = logger("harmonyhub:client:harmonyclient");
 const util_1 = require("./util");
@@ -16,20 +15,12 @@ const events_1 = require("events");
  * Creates a new HarmonyClient using the given xmppClient to communication.
  * @param xmppClient
  */
-class HarmonyClient extends events_1.EventEmitter {
+let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
     constructor(xmppClient) {
         super();
         debug("create new harmony client");
         this._xmppClient = xmppClient;
         this._responseHandlerQueue = [];
-        [
-            this.handleStanza, this.onStateDigest, this.isOff,
-            this.turnOff, this.getActivities, this.getCurrentActivity,
-            this.startActivity, this.getAvailableCommands,
-            this.request, this.send, this.end
-        ].forEach((func) => {
-            this[func.name] = func.bind(this);
-        });
         xmppClient.on("stanza", this.handleStanza);
         xmppClient.on("error", function (error) {
             debug("XMPP Error: " + error.message);
@@ -72,86 +63,71 @@ class HarmonyClient extends events_1.EventEmitter {
      * @returns Promise
      */
     getCurrentActivity() {
-        return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve current activity");
-            return this.request("getCurrentActivity")
-                .then(function (response) {
-                return response.result;
-            });
+        debug("retrieve current activity");
+        return this.request("getCurrentActivity")
+            .then(function (response) {
+            return response.result;
         });
     }
     /**
      * Retrieves a list with all available activities.
      */
     getActivities() {
-        return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve activities");
-            return this.getAvailableCommands()
-                .then(function (availableCommands) {
-                return availableCommands.activity;
-            });
+        debug("retrieve activities");
+        return this.getAvailableCommands()
+            .then(function (availableCommands) {
+            return availableCommands.activity;
         });
     }
     /**
      * Starts an activity with the given id.
-     *
-     * @param activityId
-     * @returns Promise
      */
     startActivity(activityId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            var timestamp = new Date().getTime();
-            var body = "activityId=" + activityId + ":timestamp=" + timestamp;
-            return this.request("startactivity", body, "encoded", (stanza) => {
-                // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
-                var event = stanza.getChild("event"), canHandleStanza = false;
-                if (event && event.attr("type") === "connect.stateDigest?notify") {
-                    var digest = JSON.parse(event.getText());
-                    if (activityId === "-1" && digest.activityId === activityId && digest.activityStatus === 0) {
-                        canHandleStanza = true;
-                    }
-                    else if (activityId !== "-1" && digest.activityId === activityId && digest.activityStatus === 2) {
-                        canHandleStanza = true;
-                    }
+        var timestamp = new Date().getTime();
+        var body = "activityId=" + activityId + ":timestamp=" + timestamp;
+        return this.request("startactivity", body, "encoded", (stanza) => {
+            // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
+            var event = stanza.getChild("event"), canHandleStanza = false;
+            if (event && event.attr("type") === "connect.stateDigest?notify") {
+                var digest = JSON.parse(event.getText());
+                if (activityId === "-1" && digest.activityId === activityId && digest.activityStatus === 0) {
+                    canHandleStanza = true;
                 }
-                return canHandleStanza;
-            });
+                else if (activityId !== "-1" && digest.activityId === activityId && digest.activityStatus === 2) {
+                    canHandleStanza = true;
+                }
+            }
+            return canHandleStanza;
         });
     }
     /**
      * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
      */
     turnOff() {
-        return __awaiter(this, void 0, void 0, function* () {
-            debug("turn off");
-            return this.startActivity("-1");
-        });
+        debug("turn off");
+        return this.startActivity("-1");
     }
     /**
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
      */
     isOff() {
-        return __awaiter(this, void 0, void 0, function* () {
-            debug("check if turned off");
-            return this.getCurrentActivity()
-                .then(function (activityId) {
-                var off = (activityId === "-1");
-                debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
-                return off;
-            });
+        debug("check if turned off");
+        return this.getCurrentActivity()
+            .then(function (activityId) {
+            var off = (activityId === "-1");
+            debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
+            return off;
         });
     }
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
     getAvailableCommands() {
-        return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve available commands");
-            return this.request("config", undefined, "json")
-                .then(function (response) {
-                return response;
-            });
+        debug("retrieve available commands");
+        return this.request("config", undefined, "json")
+            .then(function (response) {
+            return response;
         });
     }
     /**
@@ -207,15 +183,12 @@ class HarmonyClient extends events_1.EventEmitter {
     /**
      * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
      * not expect any specific response from the hub.
-     *
-     * @param command
-     * @param body
-     * @returns Promise
      */
     send(command, body) {
         debug("send command '" + command + "' with body " + body);
-        this._xmppClient.send(this.buildCommandIqStanza(command, body));
-        return;
+        return this.request(command, body);
+        // this._xmppClient.send(this.buildCommandIqStanza(command, body));
+        // return;
     }
     /**
      * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
@@ -224,8 +197,10 @@ class HarmonyClient extends events_1.EventEmitter {
     end() {
         debug("close harmony client");
         this._xmppClient.end();
-        return;
     }
-}
+};
+HarmonyClient = __decorate([
+    autobind_decorator_1.default
+], HarmonyClient);
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;
