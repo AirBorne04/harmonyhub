@@ -13,6 +13,7 @@
     "test": "npm run build && mocha",
     "build:client": "cd packages/client && tsc",
     "build:discover": "cd packages/discover && tsc",
+    "build:homebridge": "cd packages/homebridge && tsc",
     "build": "npm run build:discover && npm run build:client",
     "postinstall": "(cd packages/client/ && npm install) && (cd ../../packages/discover/ && npm install)"
   },

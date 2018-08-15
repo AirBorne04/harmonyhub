@@ -1,3 +1,4 @@
+import autobind from "autobind-decorator";
 import * as logger from "debug";
 
 var debug = logger("harmonyhub:client:harmonyclient");
@@ -9,7 +10,7 @@ import { EventEmitter } from "events";
  * Creates a new HarmonyClient using the given xmppClient to communication.
  * @param xmppClient
  */
-
+@autobind
 export class HarmonyClient extends EventEmitter {
 
   _xmppClient: any;
@@ -22,17 +23,6 @@ export class HarmonyClient extends EventEmitter {
 
     this._xmppClient = xmppClient;
     this._responseHandlerQueue = [];
-
-    [
-      this.handleStanza, this.onStateDigest, this.isOff,
-      this.turnOff, this.getActivities, this.getCurrentActivity,
-      this.startActivity, this.getAvailableCommands,
-      this.request, this.send, this.end
-    ].forEach(
-      (func: any) => {
-        this[func.name] = func.bind(this);
-      }
-    );
 
     xmppClient.on("stanza", this.handleStanza);
     xmppClient.on("error", function (error) {
@@ -83,7 +73,7 @@ export class HarmonyClient extends EventEmitter {
    *
    * @returns Promise
    */
-  async getCurrentActivity() {
+  getCurrentActivity(): Promise<{}> {
     debug("retrieve current activity");
 
     return this.request("getCurrentActivity")
@@ -95,7 +85,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Retrieves a list with all available activities.
    */
-  async getActivities() {
+  getActivities(): Promise<{}> {
     debug("retrieve activities")
 
     return this.getAvailableCommands()
@@ -106,11 +96,8 @@ export class HarmonyClient extends EventEmitter {
 
   /**
    * Starts an activity with the given id.
-   *
-   * @param activityId
-   * @returns Promise
    */
-  async startActivity(activityId) {
+  startActivity(activityId): Promise<{}> {
     var timestamp = new Date().getTime();
     var body = "activityId=" + activityId + ":timestamp=" + timestamp;
 
@@ -134,7 +121,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
    */
-  async turnOff() {
+  turnOff(): Promise<{}> {
     debug("turn off");
     return this.startActivity("-1");
   }
@@ -143,7 +130,7 @@ export class HarmonyClient extends EventEmitter {
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
    */
-  async isOff() {
+  isOff(): Promise<{}> {
     debug("check if turned off");
 
     return this.getCurrentActivity()
@@ -158,7 +145,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
    */
-  async getAvailableCommands() {
+  getAvailableCommands(): Promise<{}> {
     debug("retrieve available commands");
 
     return this.request("config", undefined, "json")
@@ -206,7 +193,7 @@ export class HarmonyClient extends EventEmitter {
    * @param expectedResponseType
    * @param canHandleStanzaPredicate
    */
-  request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<Object> {
+  request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
     debug("request with command '" + command + "' with body " + body);
     
     var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
@@ -236,15 +223,12 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
    * not expect any specific response from the hub.
-   *
-   * @param command
-   * @param body
-   * @returns Promise
    */
-  send(command, body) {
+  send(command: string, body: string): Promise<{}> {
     debug("send command '" + command + "' with body " + body);
-    this._xmppClient.send(this.buildCommandIqStanza(command, body));
-    return;
+    return this.request(command, body);
+    // this._xmppClient.send(this.buildCommandIqStanza(command, body));
+    // return;
   }
 
   /**
@@ -254,7 +238,6 @@ export class HarmonyClient extends EventEmitter {
   end() {
     debug("close harmony client");
     this._xmppClient.end();
-    return;
   }
 }
 

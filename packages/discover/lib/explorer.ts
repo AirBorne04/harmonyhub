@@ -1,8 +1,9 @@
+import autobind from "autobind-decorator";
 import * as logger from "debug";
 var debug = logger("harmonyhub:discover:explorer");
 
 import { EventEmitter } from "events";
-import { Ping } from "./ping";
+import { Ping, PingOptions } from "./ping";
 import { ResponseCollector } from "./responseCollector";
 
 function deserializeResponse(response: string): Object {
@@ -18,11 +19,10 @@ function deserializeResponse(response: string): Object {
 }
 
 function arrayOfKnownHubs(knownHubs: Map<string, any>): Array<any> {
-  return Array.from(knownHubs.keys()).map(function (hubUuid: string) {
-    return knownHubs.get(hubUuid);
-  });
+  return Array.from(knownHubs.values());
 }
 
+@autobind
 export class Explorer extends EventEmitter {
 
   port: number;
@@ -32,25 +32,23 @@ export class Explorer extends EventEmitter {
   responseCollector: ResponseCollector;
   cleanUpIntervalToken: NodeJS.Timer;
 
-  constructor(port: number, pingOptions) {
+  /**
+   * @param incomingPort The port on the current client to use when pinging.
+   * @param pingOptions Defines the broadcasting details for this explorer.
+   */
+  constructor(incomingPort: number, pingOptions?: PingOptions) {
     super();
 
-    this.port = port;
+    this.port = incomingPort;
     
     debug("Explorer(" + this.port + ")");
 
     this.ping = new Ping(this.port, pingOptions);
-
-    [
-      this.start, this.stop, this.handleResponse,
-      this.executeCleanUp
-    ].forEach(
-      (func) => {
-        this[func.name] = func.bind(this);
-      }
-    );
   }
 
+  /**
+   * Inits the listening for hub replies, and starts broadcasting. 
+   */
   start() {
     debug("start()");
 
@@ -62,6 +60,9 @@ export class Explorer extends EventEmitter {
     this.ping.start();
   }
 
+  /**
+   * Stop the emitting of broadcasts and disassamble all listeners.
+   */
   stop() {
     debug("stop()");
 
@@ -70,7 +71,12 @@ export class Explorer extends EventEmitter {
     clearInterval(this.cleanUpIntervalToken);
   }
 
-  handleResponse(data) {
+  /**
+   * Handles the response from a hub by deserializing the response
+   * and storing the information. Also emits the online and update events.
+   * @param data 
+   */
+  handleResponse(data: string) {
     var hub:any = deserializeResponse(data);
 
     if (this.knownHubs.get(hub.uuid) === undefined) {
@@ -83,18 +89,22 @@ export class Explorer extends EventEmitter {
     }
   }
 
+  /**
+   * Run a cleanup event all 5 seconds to  make sure unavailable hubs
+   * are no longer tracked and discharged. Also emits the offline and update events.
+   */
   executeCleanUp() {
     debug("executeCleanUp()");
 
     var now:number = Date.now();
 
-    Array.from(this.knownHubs.keys()).forEach((hubUuid: string) => {
-      var hub = this.knownHubs.get(hubUuid);
+    Array.from(this.knownHubs.values()).forEach((hub: any) => {
+      // var hub = this.knownHubs.get(hubUuid);
       var diff = now - hub.lastSeen;
 
       if (diff > 5000) {
         debug("hub at " + hub.ip + " seen last " + diff + "ms ago. clean up and tell subscribers that we lost that one.");
-        this.knownHubs.delete(hubUuid);
+        this.knownHubs.delete(hub.uuid);
         this.emit("offline", hub);
         this.emit("update", arrayOfKnownHubs(this.knownHubs));
       }

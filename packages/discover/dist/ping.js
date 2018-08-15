@@ -1,5 +1,12 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 var debug = logger("harmonyhub:discover:ping");
 const dgram = require("dgram");
@@ -10,7 +17,7 @@ exports.PingOptions = PingOptions;
 function generateBroadcastIp() {
     if (!/^win/i.test(process.platform)) {
         debug("We are running non windows so just broadcast");
-        return undefined;
+        return ["255.255.255.255"];
     }
     debug("We are running on windows so we try to find the local ip address to fix a windows broadcast protocol bug");
     var ifaces = os.networkInterfaces(), possibleIps = [];
@@ -32,7 +39,7 @@ function generateBroadcastIp() {
         return nums.join(".");
     });
 }
-class Ping {
+let Ping = class Ping {
     constructor(portToAnnounce, options) {
         // try to find an ip address that is in a local (home) network
         options = options || {};
@@ -41,22 +48,20 @@ class Ping {
             options.address = [options.address];
         }
         // merge default with user options
+        // default address is 255.255.255.255 from generateBroadcastIp()
         this.options = Object.assign({
             port: 5224,
-            address: ["255.255.255.255"],
             interval: 1000
         }, options);
         debug(`Ping(${portToAnnounce}, ${JSON.stringify(this.options)})`);
+        this.portToAnnounce = portToAnnounce;
         // init the welcome messages
         this.message = `_logitech-reverse-bonjour._tcp.local.\n${portToAnnounce}`;
         this.messageBuffer = new Buffer(this.message);
-        // bind all functions to this
-        [
-            this.emit, this.start, this.stop, this.isRunning
-        ].forEach((func) => {
-            this[func.name] = func.bind(this);
-        });
     }
+    /**
+     * emit a broadcast into the network.
+     */
     emit() {
         debug("emit()");
         // emit to all the addresses
@@ -67,12 +72,19 @@ class Ping {
             }
         }));
     }
+    /**
+     * Start an interval emitting broadcasts into the network.
+     */
     start() {
         debug("start()");
-        // setup socket to broadcast messages from any available port
+        if (this.socket) {
+            debug("Ping is already running, call stop() first");
+            return;
+        }
+        // setup socket to broadcast messages from the incoming ping
         // unref so that the app can close
         this.socket = dgram.createSocket("udp4");
-        this.socket.bind(0, () => {
+        this.socket.bind(this.portToAnnounce, () => {
             // this.options.port,  -> forget this bind no need to care from which port the data was send??
             this.socket.setBroadcast(true);
         });
@@ -80,17 +92,31 @@ class Ping {
         // start the interval, do not unref to keep node js running
         this.intervalToken = setInterval(this.emit, this.options.interval);
     }
+    /**
+     * Stop broadcasting into the network.
+     */
     stop() {
         debug("stop()");
+        if (this.intervalToken == undefined) {
+            debug("ping has already been stopped, call start() first");
+            return;
+        }
+        // stop the message emit
         clearInterval(this.intervalToken);
         this.intervalToken = undefined;
         // close the socket
         this.socket.close();
         this.socket = undefined;
     }
+    /**
+     * Return an indicator it this ping is currently running.
+     */
     isRunning() {
         debug("isRunning()");
         return (this.intervalToken !== undefined);
     }
-}
+};
+Ping = __decorate([
+    autobind_decorator_1.default
+], Ping);
 exports.Ping = Ping;

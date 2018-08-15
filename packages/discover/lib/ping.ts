@@ -1,8 +1,11 @@
+import autobind from "autobind-decorator";
+
 import * as logger from "debug";
 var debug = logger("harmonyhub:discover:ping");
 
 import * as dgram from "dgram";
 import * as os from "os";
+
 
 export class PingOptions {
   port?: number;
@@ -10,11 +13,11 @@ export class PingOptions {
   interval?: number;
 }
 
-function generateBroadcastIp() {
+function generateBroadcastIp(): Array<string> {
 
   if (!/^win/i.test(process.platform)) {
     debug("We are running non windows so just broadcast");
-    return undefined;
+    return ["255.255.255.255"];
   }
 
   debug("We are running on windows so we try to find the local ip address to fix a windows broadcast protocol bug");
@@ -43,15 +46,17 @@ function generateBroadcastIp() {
 
 }
 
+@autobind
 export class Ping {
 
-  socket: dgram.Socket;
+  private socket: dgram.Socket;
+  private portToAnnounce: number;
 
-  message: string;
-  messageBuffer: Buffer;
-  intervalToken: NodeJS.Timer;
+  private message: string;
+  private messageBuffer: Buffer;
+  private intervalToken: NodeJS.Timer;
 
-  options: PingOptions;
+  private options: PingOptions;
 
   constructor(portToAnnounce: number, options?: PingOptions) {
 
@@ -64,10 +69,10 @@ export class Ping {
     }
 
     // merge default with user options
+    // default address is 255.255.255.255 from generateBroadcastIp()
     this.options = {
       ...{
         port: 5224,
-        address: ["255.255.255.255"],
         interval: 1000
       },
       ...options
@@ -75,21 +80,16 @@ export class Ping {
 
     debug(`Ping(${portToAnnounce}, ${JSON.stringify(this.options)})`);
 
+    this.portToAnnounce = portToAnnounce;
     // init the welcome messages
     this.message = `_logitech-reverse-bonjour._tcp.local.\n${portToAnnounce}`;
     this.messageBuffer = new Buffer(this.message);
-
-    // bind all functions to this
-    [
-      this.emit, this.start, this.stop, this.isRunning
-    ].forEach(
-      (func) => {
-        this[func.name] = func.bind(this);
-      }
-    );
   }
 
-  emit() {
+  /**
+   * emit a broadcast into the network.
+   */
+  emit(): void {
     debug("emit()");
 
     // emit to all the addresses
@@ -107,13 +107,20 @@ export class Ping {
     );
   }
 
-  start() {
+  /**
+   * Start an interval emitting broadcasts into the network.
+   */
+  start(): void {
     debug("start()");
 
-    // setup socket to broadcast messages from any available port
+    if (this.socket) {
+      debug("Ping is already running, call stop() first");
+      return;
+    }
+    // setup socket to broadcast messages from the incoming ping
     // unref so that the app can close
     this.socket = dgram.createSocket("udp4");
-    this.socket.bind(0, () => {
+    this.socket.bind(this.portToAnnounce, () => {
       // this.options.port,  -> forget this bind no need to care from which port the data was send??
       this.socket.setBroadcast(true);
     });
@@ -123,8 +130,18 @@ export class Ping {
     this.intervalToken = setInterval(this.emit, this.options.interval);
   }
 
-  stop() {
+  /**
+   * Stop broadcasting into the network.
+   */
+  stop(): void {
     debug("stop()");
+
+    if (this.intervalToken == undefined) {
+      debug("ping has already been stopped, call start() first");
+      return;
+    }
+
+    // stop the message emit
     clearInterval(this.intervalToken);
     this.intervalToken = undefined;
 
@@ -133,7 +150,10 @@ export class Ping {
     this.socket = undefined;
   }
 
-  isRunning() {
+  /**
+   * Return an indicator it this ping is currently running.
+   */
+  isRunning(): boolean {
     debug("isRunning()");
     return (this.intervalToken !== undefined);
   }

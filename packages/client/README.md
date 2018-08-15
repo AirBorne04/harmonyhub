@@ -17,7 +17,7 @@ npm install @harmonyhub/client --save
 
 Enhancements over the harmonyhubjs-client package are the following
 * rewrite to class style
-* replacement of Q library with native nodejs Promises (dep reduction)
+* replacement of Q library with native nodejs Promises (dep reduction) also means that if you switch from harmonyhubjs-client package to mine you need to adjust how you are dealing with your promises (switch to official spec)
 * update of dependencies to newer packages (0 security issues by npm audit)
 * incorporation of [@patters](https://github.com/patters) bug fix of [MAX_CLIENTS=6 error](https://github.com/swissmanu/harmonyhubjs-client/pull/43)
 

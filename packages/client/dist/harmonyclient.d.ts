@@ -19,31 +19,28 @@ export declare class HarmonyClient extends EventEmitter {
      *
      * @returns Promise
      */
-    getCurrentActivity(): Promise<any>;
+    getCurrentActivity(): Promise<{}>;
     /**
      * Retrieves a list with all available activities.
      */
-    getActivities(): Promise<any>;
+    getActivities(): Promise<{}>;
     /**
      * Starts an activity with the given id.
-     *
-     * @param activityId
-     * @returns Promise
      */
-    startActivity(activityId: any): Promise<Object>;
+    startActivity(activityId: any): Promise<{}>;
     /**
      * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
      */
-    turnOff(): Promise<Object>;
+    turnOff(): Promise<{}>;
     /**
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
      */
-    isOff(): Promise<boolean>;
+    isOff(): Promise<{}>;
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
-    getAvailableCommands(): Promise<Object>;
+    getAvailableCommands(): Promise<{}>;
     /**
      * Builds an IQ stanza containing a specific command with given body, ready to send to the hub.
      *
@@ -69,16 +66,12 @@ export declare class HarmonyClient extends EventEmitter {
      * @param expectedResponseType
      * @param canHandleStanzaPredicate
      */
-    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<Object>;
+    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<{}>;
     /**
      * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
      * not expect any specific response from the hub.
-     *
-     * @param command
-     * @param body
-     * @returns Promise
      */
-    send(command: any, body: any): void;
+    send(command: string, body: string): Promise<{}>;
     /**
      * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
      * hub.
