@@ -20,11 +20,11 @@
   "dependencies": {
     "@harmonyhub/client": "^1.0.3",
     "@harmonyhub/discover": "^1.0.3",
+    "autobind-decorator": "^2.1.0",
     "debug": "^2.2.0",
     "lodash": "^4.6"
   },
   "devDependencies": {
-    "autobind-decorator": "^2.1.0",
     "@types/debug": "0.0.30",
     "@types/node": "^10.5.7"
   }
