@@ -1,9 +1,9 @@
 {
   "name": "@harmonyhub/client",
+  "version": "1.0.4",
   "description": "@harmonyhub/client is a Node.JS library which allows you to interact with your Logitech Harmony Hub.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "version": "1.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/AirBorne04/harmonyhub.git"
@@ -24,6 +24,7 @@
     "npm": ">=4.0.0"
   },
   "dependencies": {
+    "autobind-decorator": "^2.1.0",
     "node-xmpp-client": "^3.2.0",
     "node-xmpp-stanza": "^1.1.1",
     "debug": "^3.1.0",
@@ -31,8 +32,7 @@
   },
   "devDependencies": {
     "@types/debug": "0.0.30",
-    "@types/node": "^10.5.7",
-    "autobind-decorator": "^2.1.0"
+    "@types/node": "^10.5.7"
   },
   "scripts": {
     "build:watch": "tsc --watch",

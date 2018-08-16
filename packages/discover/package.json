@@ -1,5 +1,6 @@
 {
   "name": "@harmonyhub/discover",
+  "version": "1.0.4",
   "description": "Discover available Logitech Harmony Hubs in the current network.",
   "keywords": [
     "logitech",
@@ -30,12 +31,11 @@
   },
   "homepage": "https://github.com/AirBorne04/harmonyhub",
   "dependencies": {
+    "autobind-decorator": "^2.1.0",
     "debug": "^3.1.0"
   },
   "devDependencies": {
-    "autobind-decorator": "^2.1.0",
     "@types/debug": "0.0.30",
     "@types/node": "^10.5.7"
-  },
-  "version": "1.0.3"
+  }
 }
