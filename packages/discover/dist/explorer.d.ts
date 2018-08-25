@@ -10,9 +10,10 @@ export declare class Explorer extends EventEmitter {
     cleanUpIntervalToken: NodeJS.Timer;
     /**
      * @param incomingPort The port on the current client to use when pinging.
+     * If unspecified using any port available.
      * @param pingOptions Defines the broadcasting details for this explorer.
      */
-    constructor(incomingPort: number, pingOptions?: PingOptions);
+    constructor(incomingPort?: number, pingOptions?: PingOptions);
     /**
      * Inits the listening for hub replies, and starts broadcasting.
      */

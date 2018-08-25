@@ -13,8 +13,8 @@ import { EventEmitter } from "events";
 @autobind
 export class HarmonyClient extends EventEmitter {
 
-  _xmppClient: any;
-  _responseHandlerQueue: Array<any>;
+  private _xmppClient: any;
+  private _responseHandlerQueue: Array<any>;
   
   constructor(xmppClient) {
     super();
@@ -36,7 +36,7 @@ export class HarmonyClient extends EventEmitter {
     // Check for state digest:
     var event = stanza.getChild("event");
     if (event && event.attr("type") === "connect.stateDigest?notify") {
-      this.onStateDigest.call(this, JSON.parse(event.getText()));
+      this.onStateDigest(JSON.parse(event.getText()));
     }
 
     // Check for queued response handlers:
@@ -45,15 +45,24 @@ export class HarmonyClient extends EventEmitter {
         debug("received response stanza for queued response handler");
 
         var response = stanza.getChildText("oa"),
+            oa = stanza.getChild("oa"),
             decodedResponse;
 
-        if (responseHandler.responseType === "json") {
-          decodedResponse = JSON.parse(response);
-        } else {
-          decodedResponse = xmppUtil.decodeColonSeparatedResponse(response);
+        if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode != 200) {
+          responseHandler.rejectCallback({
+            code: oa.attrs.errorcode,
+            message: oa.attrs.errorstring
+          });
+        }
+        else {
+          if (responseHandler.responseType === "json") {
+            decodedResponse = JSON.parse(response);
+          } else {
+            decodedResponse = xmppUtil.decodeColonSeparatedResponse(response);
+          }
+          responseHandler.resolveCallback(decodedResponse);
         }
 
-        responseHandler.resolveCallback(decodedResponse);
         array.splice(index, 1);
       }
     });
@@ -65,7 +74,7 @@ export class HarmonyClient extends EventEmitter {
    */
   onStateDigest(stateDigest) {
     debug("received state digest");
-    this.emit("stateDigest", stateDigest);
+    this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }
 
   /**
@@ -130,7 +139,7 @@ export class HarmonyClient extends EventEmitter {
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
    */
-  isOff(): Promise<{}> {
+  isOff(): Promise<boolean> {
     debug("check if turned off");
 
     return this.getCurrentActivity()
@@ -221,14 +230,14 @@ export class HarmonyClient extends EventEmitter {
   }
 
   /**
-   * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
-   * not expect any specific response from the hub.
+   * Sends a command with given body to the hub. The returned promise gets resolved
+   * with a generic hub response without any content or an error (eg. device not existing).
    */
   send(command: string, body: string): Promise<{}> {
     debug("send command '" + command + "' with body " + body);
-    return this.request(command, body);
-    // this._xmppClient.send(this.buildCommandIqStanza(command, body));
-    // return;
+    return this.request(command, body, undefined, stanza => {
+      return stanza.getChild("oa") === undefined;
+    });
   }
 
   /**
@@ -238,6 +247,14 @@ export class HarmonyClient extends EventEmitter {
   end() {
     debug("close harmony client");
     this._xmppClient.end();
+  }
+}
+
+export namespace HarmonyClient
+{
+  export enum Events
+  {
+    STATE_DIGEST = "stateDigest"
   }
 }
 

@@ -5,8 +5,8 @@ import { EventEmitter } from "events";
  * @param xmppClient
  */
 export declare class HarmonyClient extends EventEmitter {
-    _xmppClient: any;
-    _responseHandlerQueue: Array<any>;
+    private _xmppClient;
+    private _responseHandlerQueue;
     constructor(xmppClient: any);
     handleStanza(stanza: any): void;
     /**
@@ -36,7 +36,7 @@ export declare class HarmonyClient extends EventEmitter {
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
      */
-    isOff(): Promise<{}>;
+    isOff(): Promise<boolean>;
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
@@ -68,8 +68,8 @@ export declare class HarmonyClient extends EventEmitter {
      */
     request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<{}>;
     /**
-     * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
-     * not expect any specific response from the hub.
+     * Sends a command with given body to the hub. The returned promise gets resolved
+     * with a generic hub response without any content or an error (eg. device not existing).
      */
     send(command: string, body: string): Promise<{}>;
     /**
@@ -77,5 +77,10 @@ export declare class HarmonyClient extends EventEmitter {
      * hub.
      */
     end(): void;
+}
+export declare namespace HarmonyClient {
+    enum Events {
+        STATE_DIGEST = "stateDigest"
+    }
 }
 export default HarmonyClient;

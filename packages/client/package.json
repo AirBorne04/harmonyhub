@@ -25,9 +25,9 @@
   },
   "dependencies": {
     "autobind-decorator": "^2.1.0",
+    "debug": "^3.1.0",
     "node-xmpp-client": "^3.2.0",
     "node-xmpp-stanza": "^1.1.1",
-    "debug": "^3.1.0",
     "request": "^2.48.0"
   },
   "devDependencies": {

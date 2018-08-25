@@ -27,9 +27,10 @@ function arrayOfKnownHubs(knownHubs) {
 let Explorer = class Explorer extends events_1.EventEmitter {
     /**
      * @param incomingPort The port on the current client to use when pinging.
+     * If unspecified using any port available.
      * @param pingOptions Defines the broadcasting details for this explorer.
      */
-    constructor(incomingPort, pingOptions) {
+    constructor(incomingPort = 0, pingOptions) {
         super();
         this.knownHubs = new Map();
         this.port = incomingPort;

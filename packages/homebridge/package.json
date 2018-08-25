@@ -18,8 +18,8 @@
     "homebridge": ">=0.3.1"
   },
   "dependencies": {
-    "@harmonyhub/client": "^1.0.3",
-    "@harmonyhub/discover": "^1.0.3",
+    "@harmonyhub/client": "^1.0.4",
+    "@harmonyhub/discover": "^1.0.4",
     "autobind-decorator": "^2.1.0",
     "debug": "^2.2.0",
     "lodash": "^4.6"

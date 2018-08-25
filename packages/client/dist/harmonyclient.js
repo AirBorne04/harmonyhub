@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var HarmonyClient_1;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 var debug = logger("harmonyhub:client:harmonyclient");
@@ -15,7 +16,7 @@ const events_1 = require("events");
  * Creates a new HarmonyClient using the given xmppClient to communication.
  * @param xmppClient
  */
-let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
+let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.EventEmitter {
     constructor(xmppClient) {
         super();
         debug("create new harmony client");
@@ -31,20 +32,28 @@ let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
         // Check for state digest:
         var event = stanza.getChild("event");
         if (event && event.attr("type") === "connect.stateDigest?notify") {
-            this.onStateDigest.call(this, JSON.parse(event.getText()));
+            this.onStateDigest(JSON.parse(event.getText()));
         }
         // Check for queued response handlers:
         this._responseHandlerQueue.forEach(function (responseHandler, index, array) {
             if (responseHandler.canHandleStanza(stanza)) {
                 debug("received response stanza for queued response handler");
-                var response = stanza.getChildText("oa"), decodedResponse;
-                if (responseHandler.responseType === "json") {
-                    decodedResponse = JSON.parse(response);
+                var response = stanza.getChildText("oa"), oa = stanza.getChild("oa"), decodedResponse;
+                if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode != 200) {
+                    responseHandler.rejectCallback({
+                        code: oa.attrs.errorcode,
+                        message: oa.attrs.errorstring
+                    });
                 }
                 else {
-                    decodedResponse = util_1.default.decodeColonSeparatedResponse(response);
+                    if (responseHandler.responseType === "json") {
+                        decodedResponse = JSON.parse(response);
+                    }
+                    else {
+                        decodedResponse = util_1.default.decodeColonSeparatedResponse(response);
+                    }
+                    responseHandler.resolveCallback(decodedResponse);
                 }
-                responseHandler.resolveCallback(decodedResponse);
                 array.splice(index, 1);
             }
         });
@@ -55,7 +64,7 @@ let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
      */
     onStateDigest(stateDigest) {
         debug("received state digest");
-        this.emit("stateDigest", stateDigest);
+        this.emit(HarmonyClient_1.Events.STATE_DIGEST, stateDigest);
     }
     /**
      * Returns the latest turned on activity from a hub.
@@ -181,14 +190,14 @@ let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
         return prom;
     }
     /**
-     * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
-     * not expect any specific response from the hub.
+     * Sends a command with given body to the hub. The returned promise gets resolved
+     * with a generic hub response without any content or an error (eg. device not existing).
      */
     send(command, body) {
         debug("send command '" + command + "' with body " + body);
-        return this.request(command, body);
-        // this._xmppClient.send(this.buildCommandIqStanza(command, body));
-        // return;
+        return this.request(command, body, undefined, stanza => {
+            return stanza.getChild("oa") === undefined;
+        });
     }
     /**
      * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
@@ -199,8 +208,15 @@ let HarmonyClient = class HarmonyClient extends events_1.EventEmitter {
         this._xmppClient.end();
     }
 };
-HarmonyClient = __decorate([
+HarmonyClient = HarmonyClient_1 = __decorate([
     autobind_decorator_1.default
 ], HarmonyClient);
+exports.HarmonyClient = HarmonyClient;
+(function (HarmonyClient) {
+    let Events;
+    (function (Events) {
+        Events["STATE_DIGEST"] = "stateDigest";
+    })(Events = HarmonyClient.Events || (HarmonyClient.Events = {}));
+})(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;
