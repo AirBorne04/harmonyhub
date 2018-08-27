@@ -2,9 +2,16 @@
 import { EventEmitter } from "events";
 import { Ping, PingOptions } from "./ping";
 import { ResponseCollector } from "./responseCollector";
+export interface HubData {
+    uuid: string;
+    ip: string;
+    friendlyName: string;
+    fullHubInfo: any;
+    lastSeen: number;
+}
 export declare class Explorer extends EventEmitter {
     port: number;
-    knownHubs: Map<string, any>;
+    knownHubs: Map<string, HubData>;
     ping: Ping;
     responseCollector: ResponseCollector;
     cleanUpIntervalToken: NodeJS.Timer;
@@ -33,4 +40,11 @@ export declare class Explorer extends EventEmitter {
      * are no longer tracked and discharged. Also emits the offline and update events.
      */
     executeCleanUp(): void;
+}
+export declare namespace Explorer {
+    enum Events {
+        ONLINE = "online",
+        OFFLINE = "offline",
+        UPDATE = "update"
+    }
 }

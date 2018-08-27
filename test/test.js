@@ -59,6 +59,36 @@ describe("client", function() {
     expect(decodeResponse).to.be.an("object");
     expect(decodeResponse).to.have.property("abc").to.be.eq("xyz");
   });
+  
+  it("getAvailableCommands", function(done) {
+    
+    var harmony = require("../packages/client/dist").getHarmonyClient;
+
+    // hubData.then(
+    //   hubData => harmony(hubData[0].ip)
+    // )
+    harmony("192.168.0.31").then(
+      client => {
+        client.getAvailableCommands().then(
+          commands => {
+            expect(commands).to.be.an("object");
+            expect(commands).to.haveOwnProperty("activity").and.to.be.an("array");
+            expect(commands).to.haveOwnProperty("device").and.to.be.an("array");
+
+            done();
+
+            client.end();
+          }
+        );
+      }
+    ).catch(
+      err => {
+        expect(err).to.not.equal(undefined);
+        console.log(err);
+        done();
+      }
+    );
+  });
 
 });
 

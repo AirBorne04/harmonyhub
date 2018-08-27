@@ -1,1 +1,1 @@
-export { Explorer } from "./explorer";
+export { Explorer, HubData } from "./explorer";

@@ -14,7 +14,7 @@ import { default as util } from "../util";
  *     (int) hubport - Optional. Port of the Harmony hub to connect. By default,
  *                     this is set to 5222.
  */
-function getIdentity(hubhost: string, hubport: number): Promise<string> {
+function getIdentity(hubhost: string, hubport: number = 0): Promise<string> {
   debug("retrieve identity by logging in as guest");
 
   // guest@x.com / guest
@@ -114,14 +114,14 @@ function loginWithIdentity(identity: string, hubhost: string, hubport: number): 
     //   reject(e);
     // });
 
-    // xmppClientNew.once("online", function () {
+    // xmppClientNew.on("online", function () {
     //   debug("XMPP client connected using identity token");
     //   resolve(xmppClientNew);
     // });
 
     // xmppClientNew.handle("authenticate", auth => {
     //   debug("XMPP client authenticate with identity token");
-    //   auth(jid, password);
+    //   return auth(jid, password);
     // });
 
     // xmppClientNew.start(`xmpp://${hubhost}:${hubport}`);

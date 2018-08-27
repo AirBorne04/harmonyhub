@@ -1,8 +1,12 @@
 # harmonyhub
 `harmonyhub` is a Node.JS library which wants to consolidate functions around interaction with a Logitech Harmony Hub from various different libraries from the community (the original authors and repos can be found in the Readme of each of the contained packages).
 The library contains the following packages:
-1. [client](/packages/client) (interacting with the hub)
-2. [discover](/packages/discover) (find a hub in your network)
+Package | Status
+------------ | -------------
+[client](/packages/client) (interacting with the hub) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/client.svg)](https://npmjs.com/%40harmonyhub%2Fclient) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fclient.svg)](https://npmjs.com/%40harmonyhub%2Fclient)
+[discover](/packages/discover) (find a hub in your network) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/discover.svg)](https://npmjs.com/%40harmonyhub%2Fdiscover) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fdiscover.svg)](https://npmjs.com/%40harmonyhub%2Fdiscover)
+
+I recommend to use typescript since this helps to use this code without digging to much into the documentation in code :)
 
 ## Installation
 ```bash
@@ -17,7 +21,7 @@ Development efforts are integrated with the `develop` branch first. Changes get 
 Thank you for your contribution!
 
 ## User base
-The library is currently used in the node-red-contribution for harmony by [aietes](https://github.com/Aietes) through some bugs could be discovered and fixed!
+The library is currently used in the [node-red-contrib-harmony](https://github.com/Aietes/node-red-contrib-harmony) by [aietes](https://github.com/Aietes) through which some bugs could be discovered and fixed!
 
 ## License
 

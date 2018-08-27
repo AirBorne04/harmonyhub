@@ -1,13 +1,9 @@
 {
   "name": "@harmonyhub/client",
-  "version": "1.0.4",
+  "version": "1.0.5",
+  "author": "AirBorne04, original authored by Manuel Alabor <manuel@alabor.me>",
   "description": "@harmonyhub/client is a Node.JS library which allows you to interact with your Logitech Harmony Hub.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AirBorne04/harmonyhub.git"
-  },
+  "homepage": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/client",
   "keywords": [
     "logitech",
     "harmony",
@@ -15,24 +11,18 @@
     "remote",
     "api"
   ],
-  "author": "AirBorne04, original authored by Manuel Alabor <manuel@alabor.me>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/client"
+  },
   "bugs": {
     "url": "https://github.com/AirBorne04/harmonyhub/issues"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "engines": {
     "npm": ">=4.0.0"
-  },
-  "dependencies": {
-    "autobind-decorator": "^2.1.0",
-    "debug": "^3.1.0",
-    "node-xmpp-client": "^3.2.0",
-    "node-xmpp-stanza": "^1.1.1",
-    "request": "^2.48.0"
-  },
-  "devDependencies": {
-    "@types/debug": "0.0.30",
-    "@types/node": "^10.5.7"
   },
   "scripts": {
     "build:watch": "tsc --watch",
@@ -40,5 +30,16 @@
     "version:minor": "npm version minor",
     "version:major": "npm version major",
     "publish:public": "npm publish --access=public"
+  },
+  "dependencies": {
+    "autobind-decorator": "^2.1.0",
+    "debug": "^3.1.0",
+    "node-xmpp-client": "^3.2.0",
+    "node-xmpp-stanza": "^1.1.1",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/node": "^10.9.2"
   }
 }

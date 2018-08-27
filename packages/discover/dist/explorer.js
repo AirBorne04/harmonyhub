@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var Explorer_1;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 var debug = logger("harmonyhub:discover:explorer");
@@ -19,12 +20,18 @@ function deserializeResponse(response) {
         var splitted = rawPair.split(":");
         pairs[splitted[0]] = splitted[1];
     });
-    return pairs;
+    return {
+        uuid: pairs["uuid"],
+        ip: pairs["ip"],
+        friendlyName: pairs["friendlyName"],
+        fullHubInfo: pairs,
+        lastSeen: Date.now()
+    };
 }
 function arrayOfKnownHubs(knownHubs) {
     return Array.from(knownHubs.values());
 }
-let Explorer = class Explorer extends events_1.EventEmitter {
+let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
     /**
      * @param incomingPort The port on the current client to use when pinging.
      * If unspecified using any port available.
@@ -67,8 +74,8 @@ let Explorer = class Explorer extends events_1.EventEmitter {
         if (this.knownHubs.get(hub.uuid) === undefined) {
             debug("discovered new hub " + hub.friendlyName);
             this.knownHubs.set(hub.uuid, hub);
-            this.emit("online", hub);
-            this.emit("update", arrayOfKnownHubs(this.knownHubs));
+            this.emit(Explorer_1.Events.ONLINE, hub);
+            this.emit(Explorer_1.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));
         }
         else {
             this.knownHubs.get(hub.uuid).lastSeen = Date.now();
@@ -82,18 +89,26 @@ let Explorer = class Explorer extends events_1.EventEmitter {
         debug("executeCleanUp()");
         var now = Date.now();
         Array.from(this.knownHubs.values()).forEach((hub) => {
-            // var hub = this.knownHubs.get(hubUuid);
             var diff = now - hub.lastSeen;
             if (diff > 5000) {
                 debug("hub at " + hub.ip + " seen last " + diff + "ms ago. clean up and tell subscribers that we lost that one.");
                 this.knownHubs.delete(hub.uuid);
-                this.emit("offline", hub);
-                this.emit("update", arrayOfKnownHubs(this.knownHubs));
+                this.emit(Explorer_1.Events.OFFLINE, hub);
+                this.emit(Explorer_1.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));
             }
         });
     }
 };
-Explorer = __decorate([
+Explorer = Explorer_1 = __decorate([
     autobind_decorator_1.default
 ], Explorer);
+exports.Explorer = Explorer;
+(function (Explorer) {
+    let Events;
+    (function (Events) {
+        Events["ONLINE"] = "online";
+        Events["OFFLINE"] = "offline";
+        Events["UPDATE"] = "update";
+    })(Events = Explorer.Events || (Explorer.Events = {}));
+})(Explorer = exports.Explorer || (exports.Explorer = {}));
 exports.Explorer = Explorer;

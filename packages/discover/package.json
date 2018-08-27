@@ -1,7 +1,9 @@
 {
   "name": "@harmonyhub/discover",
-  "version": "1.0.4",
+  "version": "1.0.5",
+  "author": "AirBorne04, original authored by Manuel Alabor",
   "description": "Discover available Logitech Harmony Hubs in the current network.",
+  "homepage": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/discover",
   "keywords": [
     "logitech",
     "harmony",
@@ -11,16 +13,18 @@
     "discover",
     "search"
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AirBorne04/harmonyhub.git"
+    "url": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/discover"
   },
-  "author": "AirBorne04",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AirBorne04/harmonyhub/issues"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "npm": ">=4.0.0"
   },
   "scripts": {
     "build:watch": "tsc --watch",
@@ -29,13 +33,12 @@
     "version:major": "nom version major",
     "publish:public": "npm publish --access=public"
   },
-  "homepage": "https://github.com/AirBorne04/harmonyhub",
   "dependencies": {
     "autobind-decorator": "^2.1.0",
     "debug": "^3.1.0"
   },
   "devDependencies": {
     "@types/debug": "0.0.30",
-    "@types/node": "^10.5.7"
+    "@types/node": "^10.9.2"
   }
 }

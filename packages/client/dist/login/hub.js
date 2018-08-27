@@ -93,13 +93,13 @@ function loginWithIdentity(identity, hubhost, hubport) {
         //   xmppClientNew.stop();
         //   reject(e);
         // });
-        // xmppClientNew.once("online", function () {
+        // xmppClientNew.on("online", function () {
         //   debug("XMPP client connected using identity token");
         //   resolve(xmppClientNew);
         // });
         // xmppClientNew.handle("authenticate", auth => {
         //   debug("XMPP client authenticate with identity token");
-        //   auth(jid, password);
+        //   return auth(jid, password);
         // });
         // xmppClientNew.start(`xmpp://${hubhost}:${hubport}`);
     });
