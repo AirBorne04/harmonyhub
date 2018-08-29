@@ -24,7 +24,7 @@ Thank you for your contribution!
 ## User base
 The library is currently used in the [node-red-contrib-harmony](https://github.com/Aietes/node-red-contrib-harmony) by [aietes](https://github.com/Aietes) through which some bugs could be discovered and fixed!
 
-## License
+## License
 
 Copyright (c) 2018
 
