@@ -4,14 +4,13 @@
     "lib": ["es6"],
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./examples/build",
-    "experimentalDecorators": true
+    "outDir": "./examples-build",
+    "experimentalDecorators": true,
   },
   "include": [
     "examples/**/*"
   ],
   "exclude": [
-    "examples/build",
     "node_modules",
     "**/*.spec.ts",
     "./dist/**/*"

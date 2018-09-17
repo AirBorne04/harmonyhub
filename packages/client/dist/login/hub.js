@@ -14,7 +14,7 @@ const util_1 = require("../util");
  *     (int) hubport - Optional. Port of the Harmony hub to connect. By default,
  *                     this is set to 5222.
  */
-function getIdentity(hubhost, hubport) {
+function getIdentity(hubhost, hubport = 0) {
     debug("retrieve identity by logging in as guest");
     // guest@x.com / guest
     // guest@connect.logitech.com/gatorade

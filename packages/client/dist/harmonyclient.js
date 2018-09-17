@@ -69,7 +69,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
     /**
      * Returns the latest turned on activity from a hub.
      *
-     * @returns Promise
+     * @returns Promise<string>
      */
     getCurrentActivity() {
         debug("retrieve current activity");
@@ -135,7 +135,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
     getAvailableCommands() {
         debug("retrieve available commands");
         return this.request("config", undefined, "json")
-            .then(function (response) {
+            .then((response) => {
             return response;
         });
     }
@@ -191,17 +191,26 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
     }
     /**
      * Sends a command with given body to the hub. The returned promise gets resolved
-     * with a generic hub response without any content or an error (eg. device not existing).
+     * with a generic hub response without any content or error (eg. device not existing).
      */
-    send(command, body) {
-        debug("send command '" + command + "' with body " + body);
-        return this.request(command, body, undefined, stanza => {
+    send(action, body) {
+        debug("send command '" + action + "' with body " + body);
+        var simpleAcknowledge = stanza => {
             return stanza.getChild("oa") === undefined;
-        });
+        };
+        if (typeof body == "string") {
+            return this.request(action, body, undefined, simpleAcknowledge);
+        }
+        else if (body && body.command && body.deviceId) {
+            return this.request(action, `{"command"::"${body.command}","type"::"${body.type || 'IRCommand'}","deviceId"::"${body.deviceId}"}`, undefined, simpleAcknowledge);
+        }
+        else {
+            return Promise.reject("With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}");
+        }
     }
     /**
-     * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
-     * hub.
+     * Closes the connection the the hub. You have to create a new client if you would like
+     * to communicate again with the hub.
      */
     end() {
         debug("close harmony client");
@@ -217,6 +226,15 @@ exports.HarmonyClient = HarmonyClient;
     (function (Events) {
         Events["STATE_DIGEST"] = "stateDigest";
     })(Events = HarmonyClient.Events || (HarmonyClient.Events = {}));
+    class ConfigDescription {
+    }
+    HarmonyClient.ConfigDescription = ConfigDescription;
+    class ActivityDescription {
+    }
+    HarmonyClient.ActivityDescription = ActivityDescription;
+    class DeviceDescription {
+    }
+    HarmonyClient.DeviceDescription = DeviceDescription;
 })(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;

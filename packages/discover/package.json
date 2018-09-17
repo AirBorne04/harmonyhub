@@ -13,7 +13,7 @@
     "discover",
     "search"
   ],
-  "license": "MIT",
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/discover"
@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "autobind-decorator": "^2.1.0",
-    "debug": "^3.1.0"
+    "debug": "^4.0.1"
   },
   "devDependencies": {
     "@types/debug": "0.0.30",
-    "@types/node": "^10.9.2"
+    "@types/node": "^10.10.0"
   }
 }

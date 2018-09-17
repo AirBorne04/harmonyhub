@@ -30,7 +30,7 @@ export class HarmonyClient extends EventEmitter {
     });
   }
 
-  handleStanza(stanza) {
+  private handleStanza(stanza) {
     debug("handleStanza(" + stanza.toString() + ")");
 
     // Check for state digest:
@@ -80,9 +80,9 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Returns the latest turned on activity from a hub.
    *
-   * @returns Promise
+   * @returns Promise<string>
    */
-  getCurrentActivity(): Promise<{}> {
+  getCurrentActivity(): Promise<string> {
     debug("retrieve current activity");
 
     return this.request("getCurrentActivity")
@@ -94,11 +94,11 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Retrieves a list with all available activities.
    */
-  getActivities(): Promise<{}> {
+  getActivities(): Promise<HarmonyClient.ActivityDescription[]> {
     debug("retrieve activities")
 
     return this.getAvailableCommands()
-      .then(function (availableCommands: any) {
+      .then(function (availableCommands: HarmonyClient.ConfigDescription) {
         return availableCommands.activity;
       });
   }
@@ -154,11 +154,11 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
    */
-  getAvailableCommands(): Promise<{}> {
+  getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
     debug("retrieve available commands");
 
     return this.request("config", undefined, "json")
-      .then(function (response) {
+      .then((response:HarmonyClient.ConfigDescription) => {
         return response;
       });
   }
@@ -170,7 +170,7 @@ export class HarmonyClient extends EventEmitter {
    * @param body
    * @returns {Stanza}
    */
-  buildCommandIqStanza(command: string, body: string) {
+  private buildCommandIqStanza(command: string, body: string) {
     debug("buildCommandIqStanza for command '" + command + "' with body " + body);
 
     return xmppUtil.buildIqStanza(
@@ -181,7 +181,7 @@ export class HarmonyClient extends EventEmitter {
     );
   }
 
-  defaultCanHandleStanzaPredicate(awaitedId: string, stanza) {
+  private defaultCanHandleStanzaPredicate(awaitedId: string, stanza) {
     var stanzaId = stanza.attr("id");
     return (stanzaId && stanzaId.toString() === awaitedId.toString());
   }
@@ -202,7 +202,7 @@ export class HarmonyClient extends EventEmitter {
    * @param expectedResponseType
    * @param canHandleStanzaPredicate
    */
-  request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
+  private request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
     debug("request with command '" + command + "' with body " + body);
     
     var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
@@ -231,18 +231,33 @@ export class HarmonyClient extends EventEmitter {
 
   /**
    * Sends a command with given body to the hub. The returned promise gets resolved
-   * with a generic hub response without any content or an error (eg. device not existing).
+   * with a generic hub response without any content or error (eg. device not existing).
    */
-  send(command: string, body: string): Promise<{}> {
-    debug("send command '" + command + "' with body " + body);
-    return this.request(command, body, undefined, stanza => {
+  send(action: string, body: string | {command: string, deviceId: string, type?:string}): Promise<{}> {
+    debug("send command '" + action + "' with body " + body);
+    
+    var simpleAcknowledge = stanza => {
       return stanza.getChild("oa") === undefined;
-    });
+    };
+
+    if (typeof body == "string") {
+      return this.request(action, body, undefined, simpleAcknowledge);
+    }
+    else if (body && body.command && body.deviceId) {
+      return this.request(action,
+        `{"command"::"${body.command}","type"::"${body.type || 'IRCommand'}","deviceId"::"${body.deviceId}"}`,
+        undefined, simpleAcknowledge);
+    }
+    else {
+      return Promise.reject(
+        "With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}"
+      );
+    }
   }
 
   /**
-   * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
-   * hub.
+   * Closes the connection the the hub. You have to create a new client if you would like
+   * to communicate again with the hub.
    */
   end() {
     debug("close harmony client");
@@ -255,6 +270,58 @@ export namespace HarmonyClient
   export enum Events
   {
     STATE_DIGEST = "stateDigest"
+  }
+
+  export class ConfigDescription {
+    activity: Array<ActivityDescription>;
+    device: Array<DeviceDescription>;
+  }
+
+  export class ActivityDescription {
+    id: string;
+    type: string;
+    label: string;
+    isTuningDefault?: boolean;
+    activityTypeDisplayName: string;
+    rules: Array<any>;
+    activityOrder?: number;
+    KeyboardTextEntryActivityRole?: string;
+    ChannelChangingActivityRole?: string;
+    VolumeActivityRole?: string;
+    enterActions: Array<any>;
+    fixit: Array<any>;
+    zones?: any;
+    suggestedDisplay: string;
+    isAVActivity: boolean;
+    sequences: Array<any>;
+    controlGroup: Array<any>;
+    roles: Array<any>;
+    isMultiZone?: boolean;
+    icon: string;
+    baseImageUri?: string;
+    imageKey?: string;
+  }
+
+  export class DeviceDescription {
+    label: string;
+    deviceAddedDate: string;
+    ControlPort: number;
+    contentProfileKey: number;
+    deviceProfileUri: string;
+    manufacturer: string;
+    icon: string;
+    suggestedDisplay: string;
+    deviceTypeDisplayName: string;
+    powerFeatures: Array<any>;
+    Capabilities: Array<any>;
+    controlGroup: Array<any>;
+    DongleRFID: number;
+    IsKeyboardAssociated: boolean;
+    model: string;
+    type: string;
+    id: string;
+    Transport: number;
+    isManualPower: boolean;
   }
 }
 

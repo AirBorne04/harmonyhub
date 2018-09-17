@@ -4,5 +4,5 @@
  * passing a logged in XMPP client which provides communication to the Hamrony
  * hub.
  */
-export declare function login(hubhost: string, hubport: number): Promise<{}>;
+export declare function login(hubhost: string, hubport?: number): Promise<{}>;
 export default login;
