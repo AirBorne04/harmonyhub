@@ -5,10 +5,10 @@ import { EventEmitter } from "events";
  * @param xmppClient
  */
 export declare class HarmonyClient extends EventEmitter {
-    _xmppClient: any;
-    _responseHandlerQueue: Array<any>;
+    private _xmppClient;
+    private _responseHandlerQueue;
     constructor(xmppClient: any);
-    handleStanza(stanza: any): void;
+    private handleStanza;
     /**
      * The state digest is caused by the hub to let clients know about remote updates
      * @param {message} stateDigest
@@ -17,13 +17,13 @@ export declare class HarmonyClient extends EventEmitter {
     /**
      * Returns the latest turned on activity from a hub.
      *
-     * @returns Promise
+     * @returns Promise<string>
      */
-    getCurrentActivity(): Promise<{}>;
+    getCurrentActivity(): Promise<string>;
     /**
      * Retrieves a list with all available activities.
      */
-    getActivities(): Promise<{}>;
+    getActivities(): Promise<HarmonyClient.ActivityDescription[]>;
     /**
      * Starts an activity with the given id.
      */
@@ -36,11 +36,11 @@ export declare class HarmonyClient extends EventEmitter {
      * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
      * activities id is equal to -1, no activity is on currently.
      */
-    isOff(): Promise<{}>;
+    isOff(): Promise<boolean>;
     /**
      * Acquires all available commands from the hub when resolving the returned promise.
      */
-    getAvailableCommands(): Promise<{}>;
+    getAvailableCommands(): Promise<HarmonyClient.ConfigDescription>;
     /**
      * Builds an IQ stanza containing a specific command with given body, ready to send to the hub.
      *
@@ -48,8 +48,8 @@ export declare class HarmonyClient extends EventEmitter {
      * @param body
      * @returns {Stanza}
      */
-    buildCommandIqStanza(command: string, body: string): any;
-    defaultCanHandleStanzaPredicate(awaitedId: string, stanza: any): boolean;
+    private buildCommandIqStanza;
+    private defaultCanHandleStanzaPredicate;
     /**
      * Sends a command with the given body to the hub. The returned promise gets resolved as soon as a response for this
      * very request arrives.
@@ -66,16 +66,74 @@ export declare class HarmonyClient extends EventEmitter {
      * @param expectedResponseType
      * @param canHandleStanzaPredicate
      */
-    request(command: string, body?: any, expectedResponseType?: string, canHandleStanzaPredicate?: (string: any) => boolean): Promise<{}>;
+    private request;
     /**
-     * Sends a command with given body to the hub. The returned promise gets immediately resolved since this function does
-     * not expect any specific response from the hub.
+     * Sends a command with given body to the hub. The returned promise gets resolved
+     * with a generic hub response without any content or error (eg. device not existing).
      */
-    send(command: string, body: string): Promise<{}>;
+    send(action: string, body: string | {
+        command: string;
+        deviceId: string;
+        type?: string;
+    }): Promise<{}>;
     /**
-     * Closes the connection the the hub. You have to create a new client if you would like to communicate again with the
-     * hub.
+     * Closes the connection the the hub. You have to create a new client if you would like
+     * to communicate again with the hub.
      */
     end(): void;
+}
+export declare namespace HarmonyClient {
+    enum Events {
+        STATE_DIGEST = "stateDigest"
+    }
+    class ConfigDescription {
+        activity: Array<ActivityDescription>;
+        device: Array<DeviceDescription>;
+    }
+    class ActivityDescription {
+        id: string;
+        type: string;
+        label: string;
+        isTuningDefault?: boolean;
+        activityTypeDisplayName: string;
+        rules: Array<any>;
+        activityOrder?: number;
+        KeyboardTextEntryActivityRole?: string;
+        ChannelChangingActivityRole?: string;
+        VolumeActivityRole?: string;
+        enterActions: Array<any>;
+        fixit: Array<any>;
+        zones?: any;
+        suggestedDisplay: string;
+        isAVActivity: boolean;
+        sequences: Array<any>;
+        controlGroup: Array<any>;
+        roles: Array<any>;
+        isMultiZone?: boolean;
+        icon: string;
+        baseImageUri?: string;
+        imageKey?: string;
+    }
+    class DeviceDescription {
+        label: string;
+        deviceAddedDate: string;
+        ControlPort: number;
+        contentProfileKey: number;
+        deviceProfileUri: string;
+        manufacturer: string;
+        icon: string;
+        suggestedDisplay: string;
+        deviceTypeDisplayName: string;
+        powerFeatures: Array<any>;
+        Capabilities: Array<any>;
+        controlGroup: Array<any>;
+        DongleRFID: number;
+        IsKeyboardAssociated: boolean;
+        model: string;
+        type: string;
+        id: string;
+        Transport: number;
+        isManualPower: boolean;
+    }
 }
 export default HarmonyClient;

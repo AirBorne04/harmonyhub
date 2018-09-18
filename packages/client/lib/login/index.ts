@@ -9,7 +9,7 @@ import { loginToHub } from "./hub";
  * passing a logged in XMPP client which provides communication to the Hamrony
  * hub.
  */
-export function login(hubhost: string, hubport: number): Promise<{}> {
+export function login(hubhost: string, hubport?: number): Promise<{}> {
   debug('login on hub ' + hubhost + (hubport ? ':' + hubport : ''));
   return loginToHub(hubhost, hubport);
 }

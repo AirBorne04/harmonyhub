@@ -6,7 +6,7 @@ import { EventEmitter } from "events";
 import { Ping, PingOptions } from "./ping";
 import { ResponseCollector } from "./responseCollector";
 
-function deserializeResponse(response: string): Object {
+function deserializeResponse(response: string): HubData {
   var pairs = {};
 
   response.split(";")
@@ -15,18 +15,37 @@ function deserializeResponse(response: string): Object {
       pairs[splitted[0]] = splitted[1]
     });
 
-  return pairs;
+  return {
+    uuid: pairs["uuid"],
+    ip: pairs["ip"],
+    friendlyName: pairs["friendlyName"],
+    fullHubInfo: pairs,
+    lastSeen: Date.now()
+  };
 }
 
-function arrayOfKnownHubs(knownHubs: Map<string, any>): Array<any> {
+function arrayOfKnownHubs(knownHubs: Map<string, HubData>): Array<HubData> {
   return Array.from(knownHubs.values());
+}
+
+export interface HubData {
+
+  // used in this lib
+  uuid: string;
+  ip: string;
+  friendlyName: string;
+
+  // full data
+  fullHubInfo: any;
+
+  lastSeen: number;
 }
 
 @autobind
 export class Explorer extends EventEmitter {
 
   port: number;
-  knownHubs = new Map<string, any>();
+  knownHubs = new Map<string, HubData>();
   ping: Ping;
 
   responseCollector: ResponseCollector;
@@ -34,9 +53,10 @@ export class Explorer extends EventEmitter {
 
   /**
    * @param incomingPort The port on the current client to use when pinging.
+   * If unspecified using any port available.
    * @param pingOptions Defines the broadcasting details for this explorer.
    */
-  constructor(incomingPort: number, pingOptions?: PingOptions) {
+  constructor(incomingPort: number = 0, pingOptions?: PingOptions) {
     super();
 
     this.port = incomingPort;
@@ -82,8 +102,8 @@ export class Explorer extends EventEmitter {
     if (this.knownHubs.get(hub.uuid) === undefined) {
       debug("discovered new hub " + hub.friendlyName);
       this.knownHubs.set(hub.uuid, hub);
-      this.emit("online", hub);
-      this.emit("update", arrayOfKnownHubs(this.knownHubs));
+      this.emit(Explorer.Events.ONLINE, hub);
+      this.emit(Explorer.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));
     } else {
       this.knownHubs.get(hub.uuid).lastSeen = Date.now();
     }
@@ -98,16 +118,22 @@ export class Explorer extends EventEmitter {
 
     var now:number = Date.now();
 
-    Array.from(this.knownHubs.values()).forEach((hub: any) => {
-      // var hub = this.knownHubs.get(hubUuid);
+    Array.from(this.knownHubs.values()).forEach((hub: HubData) => {
       var diff = now - hub.lastSeen;
-
       if (diff > 5000) {
         debug("hub at " + hub.ip + " seen last " + diff + "ms ago. clean up and tell subscribers that we lost that one.");
         this.knownHubs.delete(hub.uuid);
-        this.emit("offline", hub);
-        this.emit("update", arrayOfKnownHubs(this.knownHubs));
+        this.emit(Explorer.Events.OFFLINE, hub);
+        this.emit(Explorer.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));
       }
     })
+  }
+}
+
+export namespace Explorer {
+  export enum Events {
+    ONLINE = "online",
+    OFFLINE = "offline",
+    UPDATE = "update"
   }
 }

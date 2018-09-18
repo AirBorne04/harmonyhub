@@ -26,7 +26,7 @@ export const ActivityStatus = {
 @autobind
 export class ActivityAccessory extends HubAccessoryBase {
   
-  static typeKey = 'activity';
+  static typeKey = "activity";
 
   _currentActivity: any;
 

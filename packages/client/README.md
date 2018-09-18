@@ -21,7 +21,7 @@ Enhancements over the harmonyhubjs-client package are the following
 * update of dependencies to newer packages (0 security issues by npm audit)
 * incorporation of [@patters](https://github.com/patters) bug fix of [MAX_CLIENTS=6 error](https://github.com/swissmanu/harmonyhubjs-client/pull/43)
 
-## Usage
+## Usage
 ```javascript
 var harmony = require('@harmonyhub/client').getHarmonyClient;
 

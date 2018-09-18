@@ -14,7 +14,7 @@ const util_1 = require("../util");
  *     (int) hubport - Optional. Port of the Harmony hub to connect. By default,
  *                     this is set to 5222.
  */
-function getIdentity(hubhost, hubport) {
+function getIdentity(hubhost, hubport = 0) {
     debug("retrieve identity by logging in as guest");
     // guest@x.com / guest
     // guest@connect.logitech.com/gatorade
@@ -93,13 +93,13 @@ function loginWithIdentity(identity, hubhost, hubport) {
         //   xmppClientNew.stop();
         //   reject(e);
         // });
-        // xmppClientNew.once("online", function () {
+        // xmppClientNew.on("online", function () {
         //   debug("XMPP client connected using identity token");
         //   resolve(xmppClientNew);
         // });
         // xmppClientNew.handle("authenticate", auth => {
         //   debug("XMPP client authenticate with identity token");
-        //   auth(jid, password);
+        //   return auth(jid, password);
         // });
         // xmppClientNew.start(`xmpp://${hubhost}:${hubport}`);
     });

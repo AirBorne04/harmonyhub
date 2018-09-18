@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
+    "@types/node": "^4.2.23",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "typescript": "^2.7"
@@ -14,7 +15,8 @@
     "build:client": "cd packages/client && tsc",
     "build:discover": "cd packages/discover && tsc",
     "build:homebridge": "cd packages/homebridge && tsc",
-    "build": "npm run build:discover && npm run build:client",
+    "build:examples": "tsc",
+    "build": "npm run build:discover && npm run build:client && npm run build:examples",
     "postinstall": "(cd packages/client/ && npm install) && (cd ../../packages/discover/ && npm install)"
   },
   "repository": {
@@ -25,7 +27,9 @@
     "harmony",
     "harmonyhub",
     "api",
-    "xmpp"
+    "xmpp",
+    "discover",
+    "home automation"
   ],
   "author": "Daniel Freese",
   "license": "ISC",
