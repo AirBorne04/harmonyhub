@@ -4,7 +4,8 @@ The library contains the following packages:
 
 Package | Status
 ------------ | -------------
-[client](/packages/client) (interacting with the hub) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/client.svg)](https://npmjs.com/%40harmonyhub%2Fclient) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fclient.svg)](https://npmjs.com/%40harmonyhub%2Fclient)
+[client](/packages/client-ws) (interacting with the hub via websockets) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/client-ws.svg)](https://npmjs.com/%40harmonyhub%2Fclient-ws) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fclient-ws.svg)](https://npmjs.com/%40harmonyhub%2Fclient-ws)
+[client](/packages/client) (interacting with the hub via xmpp) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/client.svg)](https://npmjs.com/%40harmonyhub%2Fclient) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fclient.svg)](https://npmjs.com/%40harmonyhub%2Fclient)
 [discover](/packages/discover) (find a hub in your network) | [![npm](https://img.shields.io/npm/v/%40harmonyhub/discover.svg)](https://npmjs.com/%40harmonyhub%2Fdiscover) [![npm](https://img.shields.io/npm/dw/%40harmonyhub%2Fdiscover.svg)](https://npmjs.com/%40harmonyhub%2Fdiscover)
 
 I recommend to use typescript since this helps to use this code without digging to much into the documentation in code :)

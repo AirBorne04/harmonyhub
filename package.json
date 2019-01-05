@@ -3,7 +3,9 @@
   "version": "1.0.2",
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "@xmpp/client": "^0.3.0"
+  },
   "devDependencies": {
     "@types/node": "^4.2.23",
     "chai": "^4.1.2",
@@ -13,9 +15,13 @@
   "scripts": {
     "test": "npm run build && mocha",
     "build:client": "cd packages/client && tsc",
+    "build:client-ws": "cd packages/client-ws && tsc",
+    "build:client-ws:watch": "cd packages/client-ws && tsc --watch --skipLibCheck",
     "build:discover": "cd packages/discover && tsc",
     "build:homebridge": "cd packages/homebridge && tsc",
     "build:examples": "tsc",
+    "build:examples:watch": "tsc --watch",
+    "post:merge:master": "git rebase --onto origin/master HEAD && ",
     "build": "npm run build:discover && npm run build:client && npm run build:examples",
     "postinstall": "(cd packages/client/ && npm install) && (cd ../../packages/discover/ && npm install)"
   },
