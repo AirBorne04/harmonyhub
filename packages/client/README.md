@@ -1,4 +1,4 @@
-# Client Package
+# Client Package (Deprecated in favour of client-ws)
 
 `@harmonyhub/client` is a package of the harmonyhub library for interacting with a Logitech Harmony Hub.
 
