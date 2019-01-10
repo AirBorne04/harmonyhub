@@ -44,9 +44,7 @@ async function run() {
     console.log('Currently off. Turning TV on.');
 
     const activities = await harmony.getActivities(),
-      activity = activities.find(activity => {
-        return activity.label === 'Watch TV';
-      });
+      activity = activities[0];
     
     if (activity) {
       await harmony.startActivity(activity.id);
@@ -55,8 +53,10 @@ async function run() {
   else {
     console.log('Currently on. Turning TV off');
     await harmony.turnOff();
-    harmony.end();
   }
+
+  // diconnect
+  harmony.end();
 }
 
 run().catch(
