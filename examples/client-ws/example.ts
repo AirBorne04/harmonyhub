@@ -8,12 +8,29 @@ async function run(): Promise<void> {
   // const dt_release = `action=${encodedAction}:status=release`;
 
   try {
-    const commands = await harmonyClient.getAvailableCommands();
-    console.log('current activity', 
-      await harmonyClient.isOff()
-    );
+    const commands = await harmonyClient.getAvailableCommands(),
+          device = commands.device[0],
+          powerControls = device.controlGroup
+            .filter(function (group) { return group.name.toLowerCase() === 'volume' })
+            .pop(),
+          powerOnFunction = powerControls['function']
+            .filter(function (action) { return action.name.toLowerCase() === 'volumeup' })
+            .pop();
 
-    harmonyClient.turnOff();
+    if (powerOnFunction) {
+      // console.log(powerOnFunction.action);
+
+      // var encodedAction = powerOnFunction.action.replace(/\:/g, '::');
+      await harmonyClient.send('holdAction', powerOnFunction.action, 100);
+    } else {
+      throw new Error('could not find poweron function of first device :(');
+    }
+
+    // console.log(
+    //   commands.device[0].controlGroup[0]
+    // )
+
+    // harmonyClient.turnOff();
     
   //   await harmonyClient.send('holdAction', dt_press);
   //   await harmonyClient.send('holdAction', dt_release);

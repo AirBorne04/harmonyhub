@@ -21,7 +21,7 @@ var debug = logger("harmonyhub:client-ws:harmonyclient");
 // import { default as xmppUtil } from "./util";
 const events_1 = require("events");
 const websocket_1 = require("websocket");
-const WebSocketAsPromised = require("websocket-as-promised/dist");
+const WebSocketAsPromised = require("websocket-as-promised");
 const got = require("got");
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
@@ -158,8 +158,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                 }
             }
         };
-        return this._wsClient.sendRequest(payload)
-            .then(response => response);
+        return this._wsClient.sendRequest(payload);
     }
     /**
      * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
@@ -173,12 +172,14 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * activities id is equal to -1, no activity is on currently.
      */
     isOff() {
-        debug("check if turned off");
-        return this.getCurrentActivity()
-            .then(function (activityId) {
-            const off = (activityId === "-1");
-            debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
-            return off;
+        return __awaiter(this, void 0, void 0, function* () {
+            debug("check if turned off");
+            return this.getCurrentActivity()
+                .then(function (activityId) {
+                const off = (activityId === "-1");
+                debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
+                return off;
+            });
         });
     }
     /**
@@ -199,8 +200,57 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
             }
         };
         return this._wsClient.sendRequest(payload)
-            .then((response) => {
-            return response;
+            .then((resp) => {
+            return resp.data;
+        });
+    }
+    /**
+     * sends a command to the hub, including the press action and the release after the command_timeframe
+     * @param action action name usually 'holdAction'
+     * @param body
+     * @param command_timeframe the time when to send a release message
+     */
+    send(action, body, command_timeframe = 0) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let encodedAction;
+            if (typeof body === 'string') {
+                encodedAction = body;
+            }
+            else if (body && body.command && body.deviceId) {
+                debug(`Sending command ${body.command} to device ${body.deviceId} with delay`);
+                encodedAction = `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`;
+            }
+            else {
+                return Promise.reject("With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}");
+            }
+            const payloadPress = {
+                hubId: this._remoteId,
+                timeout: 30,
+                hbus: {
+                    cmd: `harmony.engine?${action}`,
+                    id: 0,
+                    params: {
+                        async: 'true',
+                        timestamp: 0,
+                        status: 'press',
+                        verb: 'render',
+                        action: encodedAction
+                    }
+                }
+            }, payloadRelease = Object.assign({}, payloadPress, { hbus: Object.assign({}, payloadPress.hbus, { params: Object.assign({}, payloadPress.hbus.params, { status: 'release' }) }) });
+            this._wsClient.sendPacked(payloadPress);
+            return new Promise((resolve, reject) => {
+                if (command_timeframe > 0) {
+                    setTimeout(() => {
+                        this._wsClient.sendPacked(payloadRelease);
+                        resolve();
+                    }, command_timeframe);
+                }
+                else {
+                    this._wsClient.sendPacked(payloadRelease);
+                    resolve();
+                }
+            });
         });
     }
     /**
@@ -230,6 +280,28 @@ exports.HarmonyClient = HarmonyClient;
     class DeviceDescription {
     }
     HarmonyClient.DeviceDescription = DeviceDescription;
+    class PowerFeatures {
+    }
+    HarmonyClient.PowerFeatures = PowerFeatures;
+    class PowerAction {
+    }
+    HarmonyClient.PowerAction = PowerAction;
+    class ControlGroup {
+    }
+    HarmonyClient.ControlGroup = ControlGroup;
+    class Function {
+    }
+    HarmonyClient.Function = Function;
+    class StateDigest {
+    }
+    HarmonyClient.StateDigest = StateDigest;
+    let StateDigestStatus;
+    (function (StateDigestStatus) {
+        StateDigestStatus[StateDigestStatus["HUB_IS_OFF"] = 0] = "HUB_IS_OFF";
+        StateDigestStatus[StateDigestStatus["ACTIVITY_STARTING"] = 1] = "ACTIVITY_STARTING";
+        StateDigestStatus[StateDigestStatus["ACTIVITY_STARTED"] = 2] = "ACTIVITY_STARTED";
+        StateDigestStatus[StateDigestStatus["HUB_TURNING_OFF"] = 3] = "HUB_TURNING_OFF";
+    })(StateDigestStatus = HarmonyClient.StateDigestStatus || (HarmonyClient.StateDigestStatus = {}));
 })(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;

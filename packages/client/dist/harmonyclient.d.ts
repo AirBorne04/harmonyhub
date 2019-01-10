@@ -102,12 +102,12 @@ export declare namespace HarmonyClient {
         ChannelChangingActivityRole?: string;
         VolumeActivityRole?: string;
         enterActions: Array<any>;
-        fixit: Array<any>;
+        fixit: any;
         zones?: any;
         suggestedDisplay: string;
         isAVActivity: boolean;
         sequences: Array<any>;
-        controlGroup: Array<any>;
+        controlGroup: Array<ControlGroup>;
         roles: Array<any>;
         isMultiZone?: boolean;
         icon: string;
@@ -124,9 +124,9 @@ export declare namespace HarmonyClient {
         icon: string;
         suggestedDisplay: string;
         deviceTypeDisplayName: string;
-        powerFeatures: Array<any>;
-        Capabilities: Array<any>;
-        controlGroup: Array<any>;
+        powerFeatures: PowerFeatures;
+        Capabilities: Array<number>;
+        controlGroup: Array<ControlGroup>;
         DongleRFID: number;
         IsKeyboardAssociated: boolean;
         model: string;
@@ -134,6 +134,36 @@ export declare namespace HarmonyClient {
         id: string;
         Transport: number;
         isManualPower: boolean;
+    }
+    class PowerFeatures {
+        PowerOffActions: PowerAction;
+        PowerOnActions: PowerAction;
+    }
+    class PowerAction {
+        __type: string;
+        IRCommandName: string;
+        Order: number;
+        Duration: any;
+        ActionId: number;
+    }
+    class ControlGroup {
+        name: string;
+        function: Array<Function>;
+    }
+    class Function {
+        action: string;
+        name: string;
+        label: string;
+    }
+    class StateDigest {
+        activityId: string;
+        activityStatus: StateDigestStatus;
+    }
+    enum StateDigestStatus {
+        HUB_IS_OFF = 0,
+        ACTIVITY_STARTING = 1,
+        ACTIVITY_STARTED = 2,
+        HUB_TURNING_OFF = 3
     }
 }
 export default HarmonyClient;

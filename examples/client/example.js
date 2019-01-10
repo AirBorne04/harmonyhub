@@ -13,7 +13,7 @@ function test() {
             .filter(function (group) { return group.name.toLowerCase() === 'power' })
             .pop();
 
-            var powerOnFunction = powerControls['function']
+        var powerOnFunction = powerControls['function']
             .filter(function (action) { return action.name.toLowerCase() === 'poweron' })
             .pop();
 

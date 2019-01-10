@@ -16,6 +16,7 @@ npm install @harmonyhub/client-ws --save
 ## Enhancements
 
 Enhancements over the harmonyhubjs-client package are the following
+* added typings to the harmonyhub response data for easing development with typescript
 * switch to the harmony service running on websockets (compatible to the xmpp version)
 * rewrite to class style
 * replacement of Q library with native nodejs Promises (dep reduction) also means that if you switch from harmonyhubjs-client package to mine you need to adjust how you are dealing with your promises (switch to official spec)
@@ -23,42 +24,49 @@ Enhancements over the harmonyhubjs-client package are the following
 * incorporation of [@patters](https://github.com/patters) bug fix of [MAX_CLIENTS=6 error](https://github.com/swissmanu/harmonyhubjs-client/pull/43)
 
 ## Usage
+
+The following examples are available in the example [folder](/examples/client-ws) and are written in modern javascript with async/await utilization.
+
+* [toggleTvActivity](/examples/client-ws/toggleTvActivity.ts) - toggles 'Watch TV' activity and off (same as below)
+* [printFunctions](/examples/client-ws/printFunctions.ts) - prints out all available devices and their names together with all commands availbale for a 'Television' device
+* [stateDigest](/examples/client-ws/stateDigest.ts) - shows how to listen on stateDigest events from the hub
+
+This example connects to a Harmony hub available on the IP `192.168.0.30`. As soon as the the connection is established, `isOff()` checks if the equipment is turned off. If off, the activity with the name `Watch TV` is started. If on, all devices are turned off.
+
 ```javascript
-var harmony = require('@harmonyhub/client-ws').getHarmonyClient;
+import { getHarmonyClient } from '@harmonyhub/client-ws';
 
-harmony('192.168.1.200')
-  .then(function(harmonyClient) {
-    harmonyClient.isOff()
-      .then(function(off) {
-        if(off) {
-          console.log('Currently off. Turning TV on.');
+async function run() {
+  const harmony = await getHarmonyClient('192.168.0.30'),
+        isOff = await harmony.isOff();
+  
+  if (isOff) {
+    console.log('Currently off. Turning TV on.');
 
-          harmonyClient.getActivities()
-            .then(function(activities) {
-              activities.some(function(activity) {
-                if(activity.label === 'Watch TV') {
-                  var id = activity.id
-                  harmonyClient.startActivity(id)
-                  harmonyClient.end()
-                  return true
-                }
-                return false
-              })
-            });
-        } else {
-          console.log('Currently on. Turning TV off');
-          harmonyClient.turnOff();
-          harmonyClient.end();
-        }
-      })
-  });
+    const activities = await harmony.getActivities(),
+      activity = activities.find(activity => {
+        return activity.label === 'Watch TV';
+      });
+    
+    if (activity) {
+      await harmony.startActivity(activity.id);
+    }
+  }
+  else {
+    console.log('Currently on. Turning TV off');
+    await harmony.turnOff();
+    harmony.end();
+  }
+}
+
+run().catch(
+  err => console.log(err)
+);
 ```
-
-This example connects to a Harmony hub available on the IP `192.168.1.200`. As soon as the the connection is established, `isOff()` checks if the equipment is turned off. If off, the activity with the name `Watch TV` is started. If on, all devices are turned off.
 
 ## Debug Traces
 `@harmonyhub/client-ws` uses [debug](https://github.com/visionmedia/debug) for generating traces throughout its execution time. Activate them by setting the `DEBUG` environment variable:
 
 ```bash
-$ DEBUG=harmonyhub:client-ws* node myharmonyjsapp.js
+$ DEBUG=harmonyhub:client-ws* node example.js
 ```

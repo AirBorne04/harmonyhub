@@ -1,6 +1,6 @@
 {
   "name": "@harmonyhub/client-ws",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "AirBorne04, original authored by Manuel Alabor <manuel@alabor.me>, websocket version by lopelex",
   "description": "@harmonyhub/client-ws is a Node.JS library which allows you to interact with your Logitech Harmony Hub on the websocket service interface.",
   "homepage": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/client-ws",
@@ -32,15 +32,14 @@
     "publish:public": "npm publish --access=public"
   },
   "dependencies": {
-    "autobind-decorator": "^2.1.0",
+    "autobind-decorator": "^2.4.0",
     "debug": "^4.0.1",
     "got": "^9.5.0",
-    "request": "^2.88.0",
     "websocket": "^1.0.28",
     "websocket-as-promised": "^0.9.0"
   },
   "devDependencies": {
-    "@types/debug": "0.0.30",
+    "@types/debug": "0.0.31",
     "@types/node": "^10.10.0"
   }
 }

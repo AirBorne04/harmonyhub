@@ -2,10 +2,6 @@
 
 `@harmonyhub/client` is a package of the harmonyhub library for interacting with a Logitech Harmony Hub.
 
-<aside class="notice">
-If you are considering to start a project using this package you should rather go for the `@harmonyhub/client-ws` package as this is also working after the 206 firmware update from end of 2018.
-</aside>
-
 It is based upon [@swissmanu](https://github.com/swissmanu) harmonyhubjs-client
 Which was based upon [@jterraces](https://github.com/jterrace) awesome Harmony
 [protocol guide](https://github.com/jterrace/pyharmony/blob/master/PROTOCOL.md). `harmonyhubjs-client` provides an
@@ -20,6 +16,7 @@ npm install @harmonyhub/client --save
 ## Enhancements
 
 Enhancements over the harmonyhubjs-client package are the following
+* added typings to the harmonyhub response data for easing development with typescript
 * rewrite to class style
 * replacement of Q library with native nodejs Promises (dep reduction) also means that if you switch from harmonyhubjs-client package to mine you need to adjust how you are dealing with your promises (switch to official spec)
 * update of dependencies to newer packages (0 security issues by npm audit)

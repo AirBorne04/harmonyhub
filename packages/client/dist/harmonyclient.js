@@ -235,6 +235,28 @@ exports.HarmonyClient = HarmonyClient;
     class DeviceDescription {
     }
     HarmonyClient.DeviceDescription = DeviceDescription;
+    class PowerFeatures {
+    }
+    HarmonyClient.PowerFeatures = PowerFeatures;
+    class PowerAction {
+    }
+    HarmonyClient.PowerAction = PowerAction;
+    class ControlGroup {
+    }
+    HarmonyClient.ControlGroup = ControlGroup;
+    class Function {
+    }
+    HarmonyClient.Function = Function;
+    class StateDigest {
+    }
+    HarmonyClient.StateDigest = StateDigest;
+    let StateDigestStatus;
+    (function (StateDigestStatus) {
+        StateDigestStatus[StateDigestStatus["HUB_IS_OFF"] = 0] = "HUB_IS_OFF";
+        StateDigestStatus[StateDigestStatus["ACTIVITY_STARTING"] = 1] = "ACTIVITY_STARTING";
+        StateDigestStatus[StateDigestStatus["ACTIVITY_STARTED"] = 2] = "ACTIVITY_STARTED";
+        StateDigestStatus[StateDigestStatus["HUB_TURNING_OFF"] = 3] = "HUB_TURNING_OFF";
+    })(StateDigestStatus = HarmonyClient.StateDigestStatus || (HarmonyClient.StateDigestStatus = {}));
 })(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;
