@@ -1,16 +1,16 @@
 {
   "name": "harmonyhub",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
   "dependencies": {
     "@xmpp/client": "^0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^4.2.23",
-    "chai": "^4.1.2",
+    "@types/node": "^10.12.18",
+    "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "typescript": "^2.7"
+    "typescript": "^3.1.6"
   },
   "scripts": {
     "test": "npm run build && mocha",
@@ -21,7 +21,7 @@
     "build:homebridge": "cd packages/homebridge && tsc",
     "build:examples": "tsc",
     "build:examples:watch": "tsc --watch",
-    "post:merge:master": "git rebase --onto origin/master HEAD && ",
+    "post:merge:master": "git rebase --onto origin/master HEAD && git push origin develop -f",
     "build": "npm run build:discover && npm run build:client && npm run build:examples",
     "postinstall": "(cd packages/client/ && npm install) && (cd ../../packages/discover/ && npm install)"
   },

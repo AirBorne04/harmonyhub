@@ -7,7 +7,7 @@ var debug = logger("harmonyhub:client-ws:harmonyclient");
 import { EventEmitter } from "events";
 
 import { w3cwebsocket as WebSocketClient } from "websocket";
-import * as WebSocketAsPromised from "websocket-as-promised/dist";
+import WebSocketAsPromised = require("websocket-as-promised");
 import * as got from "got";
 
 /**
@@ -16,7 +16,7 @@ import * as got from "got";
 @autobind
 export class HarmonyClient extends EventEmitter {
 
-  private _wsClient: any;
+  private _wsClient: WebSocketAsPromised;
   private _remoteId: string;
   private _interval: NodeJS.Timer;
 
@@ -95,7 +95,7 @@ export class HarmonyClient extends EventEmitter {
 
   _onMessage(message) {
     if (message.type === 'connect.stateDigest?notify') {
-      this.onStateDigest(message);
+      this.onStateDigest(message.data);
     }
   }
 
@@ -103,7 +103,7 @@ export class HarmonyClient extends EventEmitter {
    * The state digest is caused by the hub to let clients know about remote updates
    * @param {message} stateDigest 
    */
-  onStateDigest(stateDigest) {
+  private onStateDigest(stateDigest) {
     debug("received state digest ", JSON.stringify(stateDigest) );
     this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }
@@ -168,8 +168,7 @@ export class HarmonyClient extends EventEmitter {
       }
     };
 
-    return this._wsClient.sendRequest(payload)
-               .then(response => response);
+    return this._wsClient.sendRequest(payload);
   }
 
   /**
@@ -184,7 +183,7 @@ export class HarmonyClient extends EventEmitter {
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
    */
-  public isOff(): Promise<boolean> {
+  public async isOff(): Promise<boolean> {
     debug("check if turned off");
 
     return this.getCurrentActivity()
@@ -216,10 +215,76 @@ export class HarmonyClient extends EventEmitter {
     };
 
     return this._wsClient.sendRequest(payload)
-      .then((response: HarmonyClient.ConfigDescription) => {
-        return response;
+      .then((resp: any) => {
+        return resp.data as HarmonyClient.ConfigDescription;
       });
   }
+
+  /**
+   * sends a command to the hub, including the press action and the release after the command_timeframe
+   * @param action action name usually 'holdAction'
+   * @param body
+   * @param command_timeframe the time when to send a release message
+   */
+  public async send(action: string, body: string | {command: string, deviceId: string, type?:string}, command_timeframe = 0): Promise<{}> {
+    let encodedAction;
+    if (typeof body === 'string') {
+      encodedAction = body;
+    }
+    else if (body && body.command && body.deviceId) {
+      debug(`Sending command ${body.command} to device ${body.deviceId} with delay`);
+      encodedAction = `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`
+    }
+    else {
+      return Promise.reject(
+        "With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}"
+      );
+    }
+    
+    
+    const payloadPress = {
+      hubId: this._remoteId,
+      timeout: 30,
+      hbus: {
+        cmd: `harmony.engine?${action}`,
+        id: 0,
+        params: {
+          async: 'true',
+          timestamp: 0,
+          
+          status: 'press',
+          verb: 'render',
+          action: encodedAction
+        }
+      }
+    }, payloadRelease = {
+      ...payloadPress,
+      hbus: {
+        ...payloadPress.hbus,
+        params: {
+          ...payloadPress.hbus.params,
+          status: 'release'
+        }
+      }
+    };
+
+    this._wsClient.sendPacked(payloadPress);
+    
+    return new Promise((resolve, reject) => {
+      if (command_timeframe > 0) {
+        setTimeout(
+          () => {
+            this._wsClient.sendPacked(payloadRelease);
+            resolve();
+          }, command_timeframe);
+      }
+      else {
+        this._wsClient.sendPacked(payloadRelease);
+        resolve();
+      }
+    });
+  }
+    
 
   /**
    * Closes the connection the the hub. You have to create a new client if you would like
@@ -253,12 +318,12 @@ export namespace HarmonyClient {
     ChannelChangingActivityRole?: string;
     VolumeActivityRole?: string;
     enterActions: Array<any>;
-    fixit: Array<any>;
+    fixit: any;
     zones?: any;
     suggestedDisplay: string;
     isAVActivity: boolean;
     sequences: Array<any>;
-    controlGroup: Array<any>;
+    controlGroup: Array<ControlGroup>;
     roles: Array<any>;
     isMultiZone?: boolean;
     icon: string;
@@ -276,9 +341,9 @@ export namespace HarmonyClient {
     icon: string;
     suggestedDisplay: string;
     deviceTypeDisplayName: string;
-    powerFeatures: Array<any>;
-    Capabilities: Array<any>;
-    controlGroup: Array<any>;
+    powerFeatures: PowerFeatures;
+    Capabilities: Array<number>;
+    controlGroup: Array<ControlGroup>;
     DongleRFID: number;
     IsKeyboardAssociated: boolean;
     model: string;
@@ -286,6 +351,42 @@ export namespace HarmonyClient {
     id: string;
     Transport: number;
     isManualPower: boolean;
+  }
+
+  export class PowerFeatures {
+    PowerOffActions: PowerAction;
+    PowerOnActions: PowerAction;
+  }
+
+  export class PowerAction {
+    __type: string;
+    IRCommandName: string;
+    Order: number;
+    Duration: any;
+    ActionId: number;
+  }
+
+  export class ControlGroup {
+    name: string;
+    function: Array<Function>;
+  }
+
+  export class Function {
+    action: string;
+    name: string;
+    label: string;
+  }
+
+  export class StateDigest {
+    activityId: string;
+    activityStatus: StateDigestStatus;
+  }
+
+  export enum StateDigestStatus {
+    HUB_IS_OFF = 0,
+    ACTIVITY_STARTING = 1,
+    ACTIVITY_STARTED = 2,
+    HUB_TURNING_OFF = 3
   }
 }
 

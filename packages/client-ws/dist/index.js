@@ -9,6 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const harmonyclient_1 = require("./harmonyclient");
+var harmonyclient_2 = require("./harmonyclient");
+exports.HarmonyClient = harmonyclient_2.HarmonyClient;
 function getHarmonyClient(hubhost, hubport) {
     return __awaiter(this, void 0, void 0, function* () {
         // make new harmony hub client

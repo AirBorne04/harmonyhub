@@ -15,7 +15,7 @@ export declare class HarmonyClient extends EventEmitter {
      * The state digest is caused by the hub to let clients know about remote updates
      * @param {message} stateDigest
      */
-    onStateDigest(stateDigest: any): void;
+    private onStateDigest;
     /**
      * Returns the latest turned on activity from a hub.
      *
@@ -44,6 +44,17 @@ export declare class HarmonyClient extends EventEmitter {
      */
     getAvailableCommands(): Promise<HarmonyClient.ConfigDescription>;
     /**
+     * sends a command to the hub, including the press action and the release after the command_timeframe
+     * @param action action name usually 'holdAction'
+     * @param body
+     * @param command_timeframe the time when to send a release message
+     */
+    send(action: string, body: string | {
+        command: string;
+        deviceId: string;
+        type?: string;
+    }, command_timeframe?: number): Promise<{}>;
+    /**
      * Closes the connection the the hub. You have to create a new client if you would like
      * to communicate again with the hub.
      */
@@ -69,12 +80,12 @@ export declare namespace HarmonyClient {
         ChannelChangingActivityRole?: string;
         VolumeActivityRole?: string;
         enterActions: Array<any>;
-        fixit: Array<any>;
+        fixit: any;
         zones?: any;
         suggestedDisplay: string;
         isAVActivity: boolean;
         sequences: Array<any>;
-        controlGroup: Array<any>;
+        controlGroup: Array<ControlGroup>;
         roles: Array<any>;
         isMultiZone?: boolean;
         icon: string;
@@ -91,9 +102,9 @@ export declare namespace HarmonyClient {
         icon: string;
         suggestedDisplay: string;
         deviceTypeDisplayName: string;
-        powerFeatures: Array<any>;
-        Capabilities: Array<any>;
-        controlGroup: Array<any>;
+        powerFeatures: PowerFeatures;
+        Capabilities: Array<number>;
+        controlGroup: Array<ControlGroup>;
         DongleRFID: number;
         IsKeyboardAssociated: boolean;
         model: string;
@@ -101,6 +112,36 @@ export declare namespace HarmonyClient {
         id: string;
         Transport: number;
         isManualPower: boolean;
+    }
+    class PowerFeatures {
+        PowerOffActions: PowerAction;
+        PowerOnActions: PowerAction;
+    }
+    class PowerAction {
+        __type: string;
+        IRCommandName: string;
+        Order: number;
+        Duration: any;
+        ActionId: number;
+    }
+    class ControlGroup {
+        name: string;
+        function: Array<Function>;
+    }
+    class Function {
+        action: string;
+        name: string;
+        label: string;
+    }
+    class StateDigest {
+        activityId: string;
+        activityStatus: StateDigestStatus;
+    }
+    enum StateDigestStatus {
+        HUB_IS_OFF = 0,
+        ACTIVITY_STARTING = 1,
+        ACTIVITY_STARTED = 2,
+        HUB_TURNING_OFF = 3
     }
 }
 export default HarmonyClient;

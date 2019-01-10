@@ -202,7 +202,7 @@ export class HarmonyClient extends EventEmitter {
    * @param expectedResponseType
    * @param canHandleStanzaPredicate
    */
-  private request(command: string, body?, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
+  private request(command: string, body?: string, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
     debug("request with command '" + command + "' with body " + body);
     
     var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
@@ -265,10 +265,8 @@ export class HarmonyClient extends EventEmitter {
   }
 }
 
-export namespace HarmonyClient
-{
-  export enum Events
-  {
+export namespace HarmonyClient {
+  export enum Events {
     STATE_DIGEST = "stateDigest"
   }
 
@@ -289,12 +287,12 @@ export namespace HarmonyClient
     ChannelChangingActivityRole?: string;
     VolumeActivityRole?: string;
     enterActions: Array<any>;
-    fixit: Array<any>;
+    fixit: any;
     zones?: any;
     suggestedDisplay: string;
     isAVActivity: boolean;
     sequences: Array<any>;
-    controlGroup: Array<any>;
+    controlGroup: Array<ControlGroup>;
     roles: Array<any>;
     isMultiZone?: boolean;
     icon: string;
@@ -312,9 +310,9 @@ export namespace HarmonyClient
     icon: string;
     suggestedDisplay: string;
     deviceTypeDisplayName: string;
-    powerFeatures: Array<any>;
-    Capabilities: Array<any>;
-    controlGroup: Array<any>;
+    powerFeatures: PowerFeatures;
+    Capabilities: Array<number>;
+    controlGroup: Array<ControlGroup>;
     DongleRFID: number;
     IsKeyboardAssociated: boolean;
     model: string;
@@ -322,6 +320,42 @@ export namespace HarmonyClient
     id: string;
     Transport: number;
     isManualPower: boolean;
+  }
+
+  export class PowerFeatures {
+    PowerOffActions: PowerAction;
+    PowerOnActions: PowerAction;
+  }
+
+  export class PowerAction {
+    __type: string;
+    IRCommandName: string;
+    Order: number;
+    Duration: any;
+    ActionId: number;
+  }
+
+  export class ControlGroup {
+    name: string;
+    function: Array<Function>;
+  }
+
+  export class Function {
+    action: string;
+    name: string;
+    label: string;
+  }
+
+  export class StateDigest {
+    activityId: string;
+    activityStatus: StateDigestStatus;
+  }
+
+  export enum StateDigestStatus {
+    HUB_IS_OFF = 0,
+    ACTIVITY_STARTING = 1,
+    ACTIVITY_STARTED = 2,
+    HUB_TURNING_OFF = 3
   }
 }
 

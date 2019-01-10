@@ -1,6 +1,6 @@
 {
   "name": "@harmonyhub/discover",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "AirBorne04, original authored by Manuel Alabor",
   "description": "Discover available Logitech Harmony Hubs in the current network.",
   "homepage": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/discover",
@@ -34,11 +34,11 @@
     "publish:public": "npm publish --access=public"
   },
   "dependencies": {
-    "autobind-decorator": "^2.1.0",
-    "debug": "^4.0.1"
+    "autobind-decorator": "^2.4.0",
+    "debug": "^4.1.1"
   },
   "devDependencies": {
-    "@types/debug": "0.0.30",
-    "@types/node": "^10.10.0"
+    "@types/debug": "0.0.31",
+    "@types/node": "^10.12.18"
   }
 }
