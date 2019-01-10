@@ -15,7 +15,7 @@ export declare class HarmonyClient extends EventEmitter {
      * The state digest is caused by the hub to let clients know about remote updates
      * @param {message} stateDigest
      */
-    onStateDigest(stateDigest: any): void;
+    private onStateDigest;
     /**
      * Returns the latest turned on activity from a hub.
      *

@@ -95,7 +95,7 @@ export class HarmonyClient extends EventEmitter {
 
   _onMessage(message) {
     if (message.type === 'connect.stateDigest?notify') {
-      this.onStateDigest(message);
+      this.onStateDigest(message.data);
     }
   }
 
@@ -103,7 +103,7 @@ export class HarmonyClient extends EventEmitter {
    * The state digest is caused by the hub to let clients know about remote updates
    * @param {message} stateDigest 
    */
-  onStateDigest(stateDigest) {
+  private onStateDigest(stateDigest) {
     debug("received state digest ", JSON.stringify(stateDigest) );
     this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }

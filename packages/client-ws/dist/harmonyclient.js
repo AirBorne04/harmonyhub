@@ -93,7 +93,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
     }
     _onMessage(message) {
         if (message.type === 'connect.stateDigest?notify') {
-            this.onStateDigest(message);
+            this.onStateDigest(message.data);
         }
     }
     /**

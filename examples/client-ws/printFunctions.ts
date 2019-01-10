@@ -16,6 +16,7 @@ async function run() {
     // get all devices
     const commands = await harmonyClient.getAvailableCommands();
     console.log(
+      'devices',
       commands.device.map(
         (dev) => dev.label + dev.type
       )
@@ -26,6 +27,7 @@ async function run() {
       dev => dev.type === 'Television'
     );
     console.log(
+      'Functions for television',
       tv.controlGroup.map(
         (control) => `${control.name} [${control.function.map(func => func.name)}]`
       )

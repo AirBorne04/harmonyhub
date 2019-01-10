@@ -7,9 +7,12 @@ async function run() {
   try {
     // register state digest
     harmonyClient.on(HarmonyClient.Events.STATE_DIGEST,
-      (digest: HarmonyClient.StateDigest) => console.log(
-        `activity -> ${digest.activityId} is -> ${digest.activityStatus}`
-      )
+      (digest: HarmonyClient.StateDigest) => {
+        console.log(digest);
+        console.log(
+          `activity -> ${digest.activityId} is -> ${digest.activityStatus}`
+        )
+      }
     );
   } catch(error) {
     console.error('Error', error.message);
