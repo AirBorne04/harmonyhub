@@ -25,4 +25,4 @@ Thank you for your contribution!
 ## User base
 The library is currently used in the [node-red-contrib-harmony](https://github.com/Aietes/node-red-contrib-harmony) by [aietes](https://github.com/Aietes) through which some bugs could be discovered and fixed!
 
-I also do accept donations if you like working with my library [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](paypal.me/AirBorne04)
+I also do accept small donations if you like working with my library [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/AirBorne04)
