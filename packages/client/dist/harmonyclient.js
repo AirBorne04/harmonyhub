@@ -283,13 +283,10 @@ exports.HarmonyClient = HarmonyClient;
         StateDigestStatus[StateDigestStatus["ACTIVITY_STARTED"] = 2] = "ACTIVITY_STARTED";
         StateDigestStatus[StateDigestStatus["HUB_TURNING_OFF"] = 3] = "HUB_TURNING_OFF";
     })(StateDigestStatus = HarmonyClient.StateDigestStatus || (HarmonyClient.StateDigestStatus = {}));
-<<<<<<< Updated upstream
-=======
     let ERROR_CODE;
     (function (ERROR_CODE) {
         ERROR_CODE["OK"] = "200";
     })(ERROR_CODE = HarmonyClient.ERROR_CODE || (HarmonyClient.ERROR_CODE = {}));
->>>>>>> Stashed changes
 })(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;

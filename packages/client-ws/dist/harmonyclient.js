@@ -237,55 +237,6 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                         action: encodedAction
                     }
                 }
-            }, payloadRelease = Object.assign({}, payloadPress, { hbus: Object.assign({}, payloadPress.hbus, { params: Object.assign({}, payloadPress.hbus.params, { status: 'release' }) }) });
-            this._wsClient.sendPacked(payloadPress);
-            return new Promise((resolve, reject) => {
-                if (command_timeframe > 0) {
-                    setTimeout(() => {
-                        this._wsClient.sendPacked(payloadRelease);
-                        resolve();
-                    }, command_timeframe);
-                }
-                else {
-                    this._wsClient.sendPacked(payloadRelease);
-                    resolve();
-                }
-            });
-        });
-    }
-    /**
-     * sends a command to the hub, including the press action and the release after the command_timeframe
-     * @param action action name usually 'holdAction'
-     * @param body
-     * @param command_timeframe the time when to send a release message
-     */
-    send(action, body, command_timeframe = 0) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let encodedAction;
-            if (typeof body === 'string') {
-                encodedAction = body;
-            }
-            else if (body && body.command && body.deviceId) {
-                debug(`Sending command ${body.command} to device ${body.deviceId} with delay`);
-                encodedAction = `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`;
-            }
-            else {
-                return Promise.reject("With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}");
-            }
-            const payloadPress = {
-                hubId: this._remoteId,
-                timeout: 30,
-                hbus: {
-                    cmd: `harmony.engine?${action}`,
-                    id: 0,
-                    params: {
-                        async: 'true',
-                        timestamp: 0,
-                        status: 'press',
-                        verb: 'render',
-                        action: encodedAction
-                    }
-                }
             }, payloadRelease = Object.assign({}, payloadPress, { hbus: Object.assign({}, payloadPress.hbus, { params: Object.assign({}, payloadPress.hbus.params, { timestamp: command_timeframe, status: 'release' }) }) });
             this._wsClient.sendPacked(payloadPress);
             return new Promise((resolve, reject) => {
