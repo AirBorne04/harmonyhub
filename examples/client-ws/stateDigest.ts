@@ -15,7 +15,11 @@ async function run() {
       }
     );
   } catch(error) {
+<<<<<<< Updated upstream
     console.error('Error', error.message);
+=======
+    console.error(`Error ${error.message}`);
+>>>>>>> Stashed changes
   }
 
   console.log(

@@ -62,7 +62,9 @@ export declare class HarmonyClient extends EventEmitter {
 }
 export declare namespace HarmonyClient {
     enum Events {
-        STATE_DIGEST = "stateDigest"
+        STATE_DIGEST = "stateDigest",
+        CONNECTED = "open",
+        DISCONNECTED = "close"
     }
     class ConfigDescription {
         activity: Array<ActivityDescription>;
@@ -136,12 +138,39 @@ export declare namespace HarmonyClient {
     class StateDigest {
         activityId: string;
         activityStatus: StateDigestStatus;
+        sleepTimerId: number;
+        runningZoneList: Array<{}>;
+        contentVersion: number;
+        errorCode: ERROR_CODE;
+        syncStatus: number;
+        time: number;
+        stateVersion: number;
+        tzoffset: string;
+        tzOffset: string;
+        mode: number;
+        hubSwVersion: string;
+        deviceSetupState: Array<{}>;
+        isSetupComplete: boolean;
+        configVersion: number;
+        sequence: boolean;
+        discoveryServer: string;
+        discoveryServerCF: string;
+        updates: any;
+        wifiStatus: number;
+        tz: string;
+        activitySetupState: boolean;
+        runningActivityList: string;
+        hubUpdate: boolean;
+        accountId: string;
     }
     enum StateDigestStatus {
         HUB_IS_OFF = 0,
         ACTIVITY_STARTING = 1,
         ACTIVITY_STARTED = 2,
         HUB_TURNING_OFF = 3
+    }
+    enum ERROR_CODE {
+        OK = "200"
     }
 }
 export default HarmonyClient;

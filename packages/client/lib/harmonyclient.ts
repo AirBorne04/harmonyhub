@@ -7,7 +7,7 @@ import { default as xmppUtil } from "./util";
 import { EventEmitter } from "events";
 
 /**
- * Creates a new HarmonyClient using the given xmppClient to communication.
+ * Creates a new HarmonyClient using the given xmppClient to communicate.
  * @param xmppClient
  */
 @autobind
@@ -24,7 +24,10 @@ export class HarmonyClient extends EventEmitter {
     this._xmppClient = xmppClient;
     this._responseHandlerQueue = [];
 
+    this.emit(HarmonyClient.Events.CONNECTED);
+
     xmppClient.on("stanza", this.handleStanza);
+    xmppClient.on("close", this.emit(HarmonyClient.Events.DISCONNECTED));
     xmppClient.on("error", function (error) {
       debug("XMPP Error: " + error.message);
     });
@@ -72,7 +75,7 @@ export class HarmonyClient extends EventEmitter {
    * The state digest is caused by the hub to let clients know about remote updates
    * @param {message} stateDigest 
    */
-  onStateDigest(stateDigest) {
+  onStateDigest(stateDigest: HarmonyClient.StateDigest) {
     debug("received state digest");
     this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }
@@ -82,7 +85,7 @@ export class HarmonyClient extends EventEmitter {
    *
    * @returns Promise<string>
    */
-  getCurrentActivity(): Promise<string> {
+  public async getCurrentActivity(): Promise<string> {
     debug("retrieve current activity");
 
     return this.request("getCurrentActivity")
@@ -94,7 +97,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Retrieves a list with all available activities.
    */
-  getActivities(): Promise<HarmonyClient.ActivityDescription[]> {
+  public async getActivities(): Promise<HarmonyClient.ActivityDescription[]> {
     debug("retrieve activities")
 
     return this.getAvailableCommands()
@@ -106,7 +109,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Starts an activity with the given id.
    */
-  startActivity(activityId): Promise<{}> {
+  public async startActivity(activityId): Promise<{}> {
     var timestamp = new Date().getTime();
     var body = "activityId=" + activityId + ":timestamp=" + timestamp;
 
@@ -130,7 +133,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
    */
-  turnOff(): Promise<{}> {
+  public async turnOff(): Promise<{}> {
     debug("turn off");
     return this.startActivity("-1");
   }
@@ -139,7 +142,7 @@ export class HarmonyClient extends EventEmitter {
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
    */
-  isOff(): Promise<boolean> {
+  public async isOff(): Promise<boolean> {
     debug("check if turned off");
 
     return this.getCurrentActivity()
@@ -154,7 +157,7 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
    */
-  getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
+  public async getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
     debug("retrieve available commands");
 
     return this.request("config", undefined, "json")
@@ -233,7 +236,7 @@ export class HarmonyClient extends EventEmitter {
    * Sends a command with given body to the hub. The returned promise gets resolved
    * with a generic hub response without any content or error (eg. device not existing).
    */
-  send(action: string, body: string | {command: string, deviceId: string, type?:string}): Promise<{}> {
+  public async send(action: string, body: string | {command: string, deviceId: string, type?:string}): Promise<{}> {
     debug("send command '" + action + "' with body " + body);
     
     var simpleAcknowledge = stanza => {
@@ -267,7 +270,9 @@ export class HarmonyClient extends EventEmitter {
 
 export namespace HarmonyClient {
   export enum Events {
-    STATE_DIGEST = "stateDigest"
+    STATE_DIGEST = "stateDigest",
+    CONNECTED = "open",
+    DISCONNECTED = "close"
   }
 
   export class ConfigDescription {
@@ -349,6 +354,31 @@ export namespace HarmonyClient {
   export class StateDigest {
     activityId: string;
     activityStatus: StateDigestStatus;
+    
+    sleepTimerId: number;
+    runningZoneList: Array<{}>;
+    contentVersion: number;
+    errorCode: ERROR_CODE;
+    syncStatus: number;
+    time: number;
+    stateVersion: number;
+    tzoffset: string;
+    tzOffset: string;
+    mode: number;
+    hubSwVersion: string;
+    deviceSetupState: Array<{}>;
+    isSetupComplete: boolean;
+    configVersion: number;
+    sequence: boolean;
+    discoveryServer: string;
+    discoveryServerCF: string;
+    updates: any;
+    wifiStatus: number;
+    tz: string;
+    activitySetupState: boolean;
+    runningActivityList: string;
+    hubUpdate: boolean;
+    accountId: string;
   }
 
   export enum StateDigestStatus {
@@ -356,6 +386,10 @@ export namespace HarmonyClient {
     ACTIVITY_STARTING = 1,
     ACTIVITY_STARTED = 2,
     HUB_TURNING_OFF = 3
+  }
+
+  export enum ERROR_CODE {
+    OK = '200'
   }
 }
 

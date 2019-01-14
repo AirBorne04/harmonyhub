@@ -70,7 +70,7 @@ export class HarmonyClient extends EventEmitter {
 
     this._wsClient.onClose.addListener(() => {
       clearInterval(this._interval);
-      this.emit('close');
+      this.emit(HarmonyClient.Events.DISCONNECTED);
     });
 
     const payload = {
@@ -90,7 +90,7 @@ export class HarmonyClient extends EventEmitter {
       .then(() => this._interval = setInterval(() => this._wsClient.send(''), 55000))
       .then(() => this._wsClient.onUnpackedMessage.addListener(this._onMessage))
       .then(() => this._wsClient.sendPacked(payload))
-      .then(() => this.emit('open'));
+      .then(() => this.emit(HarmonyClient.Events.CONNECTED));
   }
 
   _onMessage(message) {
@@ -263,6 +263,7 @@ export class HarmonyClient extends EventEmitter {
         ...payloadPress.hbus,
         params: {
           ...payloadPress.hbus.params,
+          timestamp: command_timeframe,
           status: 'release'
         }
       }
@@ -298,7 +299,9 @@ export class HarmonyClient extends EventEmitter {
 
 export namespace HarmonyClient {
   export enum Events {
-    STATE_DIGEST = "stateDigest"
+    STATE_DIGEST = "stateDigest",
+    CONNECTED = "open",
+    DISCONNECTED = "close"
   }
 
   export class ConfigDescription {
@@ -380,6 +383,31 @@ export namespace HarmonyClient {
   export class StateDigest {
     activityId: string;
     activityStatus: StateDigestStatus;
+    
+    sleepTimerId: number;
+    runningZoneList: Array<{}>;
+    contentVersion: number;
+    errorCode: ERROR_CODE;
+    syncStatus: number;
+    time: number;
+    stateVersion: number;
+    tzoffset: string;
+    tzOffset: string;
+    mode: number;
+    hubSwVersion: string;
+    deviceSetupState: Array<{}>;
+    isSetupComplete: boolean;
+    configVersion: number;
+    sequence: boolean;
+    discoveryServer: string;
+    discoveryServerCF: string;
+    updates: any;
+    wifiStatus: number;
+    tz: string;
+    activitySetupState: boolean;
+    runningActivityList: string;
+    hubUpdate: boolean;
+    accountId: string;
   }
 
   export enum StateDigestStatus {
@@ -387,6 +415,10 @@ export namespace HarmonyClient {
     ACTIVITY_STARTING = 1,
     ACTIVITY_STARTED = 2,
     HUB_TURNING_OFF = 3
+  }
+
+  export enum ERROR_CODE {
+    OK = '200'
   }
 }
 

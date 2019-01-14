@@ -70,7 +70,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
             });
             this._wsClient.onClose.addListener(() => {
                 clearInterval(this._interval);
-                this.emit('close');
+                this.emit(HarmonyClient_1.Events.DISCONNECTED);
             });
             const payload = {
                 hubId: this._remoteId,
@@ -88,7 +88,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                 .then(() => this._interval = setInterval(() => this._wsClient.send(''), 55000))
                 .then(() => this._wsClient.onUnpackedMessage.addListener(this._onMessage))
                 .then(() => this._wsClient.sendPacked(payload))
-                .then(() => this.emit('open'));
+                .then(() => this.emit(HarmonyClient_1.Events.CONNECTED));
         });
     }
     _onMessage(message) {
@@ -254,6 +254,55 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
         });
     }
     /**
+     * sends a command to the hub, including the press action and the release after the command_timeframe
+     * @param action action name usually 'holdAction'
+     * @param body
+     * @param command_timeframe the time when to send a release message
+     */
+    send(action, body, command_timeframe = 0) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let encodedAction;
+            if (typeof body === 'string') {
+                encodedAction = body;
+            }
+            else if (body && body.command && body.deviceId) {
+                debug(`Sending command ${body.command} to device ${body.deviceId} with delay`);
+                encodedAction = `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`;
+            }
+            else {
+                return Promise.reject("With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}");
+            }
+            const payloadPress = {
+                hubId: this._remoteId,
+                timeout: 30,
+                hbus: {
+                    cmd: `harmony.engine?${action}`,
+                    id: 0,
+                    params: {
+                        async: 'true',
+                        timestamp: 0,
+                        status: 'press',
+                        verb: 'render',
+                        action: encodedAction
+                    }
+                }
+            }, payloadRelease = Object.assign({}, payloadPress, { hbus: Object.assign({}, payloadPress.hbus, { params: Object.assign({}, payloadPress.hbus.params, { timestamp: command_timeframe, status: 'release' }) }) });
+            this._wsClient.sendPacked(payloadPress);
+            return new Promise((resolve, reject) => {
+                if (command_timeframe > 0) {
+                    setTimeout(() => {
+                        this._wsClient.sendPacked(payloadRelease);
+                        resolve();
+                    }, command_timeframe);
+                }
+                else {
+                    this._wsClient.sendPacked(payloadRelease);
+                    resolve();
+                }
+            });
+        });
+    }
+    /**
      * Closes the connection the the hub. You have to create a new client if you would like
      * to communicate again with the hub.
      */
@@ -270,6 +319,8 @@ exports.HarmonyClient = HarmonyClient;
     let Events;
     (function (Events) {
         Events["STATE_DIGEST"] = "stateDigest";
+        Events["CONNECTED"] = "open";
+        Events["DISCONNECTED"] = "close";
     })(Events = HarmonyClient.Events || (HarmonyClient.Events = {}));
     class ConfigDescription {
     }
@@ -302,6 +353,10 @@ exports.HarmonyClient = HarmonyClient;
         StateDigestStatus[StateDigestStatus["ACTIVITY_STARTED"] = 2] = "ACTIVITY_STARTED";
         StateDigestStatus[StateDigestStatus["HUB_TURNING_OFF"] = 3] = "HUB_TURNING_OFF";
     })(StateDigestStatus = HarmonyClient.StateDigestStatus || (HarmonyClient.StateDigestStatus = {}));
+    let ERROR_CODE;
+    (function (ERROR_CODE) {
+        ERROR_CODE["OK"] = "200";
+    })(ERROR_CODE = HarmonyClient.ERROR_CODE || (HarmonyClient.ERROR_CODE = {}));
 })(HarmonyClient = exports.HarmonyClient || (exports.HarmonyClient = {}));
 exports.HarmonyClient = HarmonyClient;
 exports.default = HarmonyClient;

@@ -14,7 +14,7 @@ import { default as util } from "../util";
  *     (int) hubport - Optional. Port of the Harmony hub to connect. By default,
  *                     this is set to 5222.
  */
-function getIdentity(hubhost: string, hubport: number = 0): Promise<string> {
+function getIdentity(hubhost: string, hubport: number = 5222): Promise<string> {
   debug("retrieve identity by logging in as guest");
 
   // guest@x.com / guest
