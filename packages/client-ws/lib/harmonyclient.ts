@@ -20,17 +20,17 @@ export class HarmonyClient extends EventEmitter {
   private _remoteId: string;
   private _interval: NodeJS.Timer;
 
-  public connect(hubip: string) {
+  public connect(hubip: string, timeout?: number) {
     debug("connect to harmony hub");
 
-    return this._getRemoteId(hubip)
+    return this._getRemoteId(hubip, timeout)
       .then(response => {
         this._remoteId = response.body.data.remoteId;
       })
       .then(() => this._connect(hubip))
   }
 
-  public connectWithDiscovery(discovery: any) {
+  public connectWithDiscovery(discovery: any, timeout?: number) {
     debug("connect to harmony hub with discovery object");
     
     const { fullHubInfo } = discovery;
@@ -39,15 +39,15 @@ export class HarmonyClient extends EventEmitter {
     
     // if we were able to find the remote id, connect to the hub. otherwise,
     // fallback to the default connect mechanism.
-    return this._remoteId ? this._connect(hubip) : this.connect(hubip);
+    return this._remoteId ? this._connect(hubip) : this.connect(hubip, timeout);
   }
 
-  private _getRemoteId(hubip: string) {
+  private _getRemoteId(hubip: string, timeout?: number) {
 
     const payload = {
       url: 'http://' + hubip + ':8088',
       method: 'POST',
-      timeout: 5000,
+      timeout: timeout || 5000,
       headers: {
         'Content-type': 'application/json',
         Accept: 'text/plain',
