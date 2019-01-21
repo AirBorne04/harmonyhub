@@ -8,4 +8,11 @@ export async function getHarmonyClient(hubhost: string, hubport?: number): Promi
   return harmonyClient;
 }
 
+export async function getHarmonyClientWithDiscovery(discovery: any): Promise<HarmonyClient> {
+  // make new harmony hub client from discovery object
+  const harmonyClient = new HarmonyClient();
+  await harmonyClient.connectWithDiscovery(discovery);
+  return harmonyClient;
+}
+
 export default getHarmonyClient;

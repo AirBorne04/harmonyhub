@@ -30,6 +30,18 @@ export class HarmonyClient extends EventEmitter {
       .then(() => this._connect(hubip))
   }
 
+  public connectWithDiscovery(discovery: any) {
+    debug("connect to harmony hub with discovery object");
+    
+    const { fullHubInfo } = discovery;
+    this._remoteId = fullHubInfo ? fullHubInfo.remoteId : undefined;
+    const hubip = discovery.ip;
+    
+    // if we were able to find the remote id, connect to the hub. otherwise,
+    // fallback to the default connect mechanism.
+    return this._remoteId ? this._connect(hubip) : this.connect(hubip);
+  }
+
   private _getRemoteId(hubip: string) {
 
     const payload = {
