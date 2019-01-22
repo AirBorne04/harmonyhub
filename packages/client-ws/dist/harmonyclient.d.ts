@@ -7,7 +7,8 @@ export declare class HarmonyClient extends EventEmitter {
     private _wsClient;
     private _remoteId;
     private _interval;
-    connect(hubip: string): any;
+    connect(hubip: string, timeout?: number): any;
+    connectWithDiscovery(discovery: any, timeout?: number): any;
     private _getRemoteId;
     private _connect;
     _onMessage(message: any): void;

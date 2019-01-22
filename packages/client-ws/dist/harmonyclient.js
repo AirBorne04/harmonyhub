@@ -27,19 +27,28 @@ const got = require("got");
  * Creates a new HarmonyClient using the given xmppClient to communication.
  */
 let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.EventEmitter {
-    connect(hubip) {
+    connect(hubip, timeout) {
         debug("connect to harmony hub");
-        return this._getRemoteId(hubip)
+        return this._getRemoteId(hubip, timeout)
             .then(response => {
             this._remoteId = response.body.data.remoteId;
         })
             .then(() => this._connect(hubip));
     }
-    _getRemoteId(hubip) {
+    connectWithDiscovery(discovery, timeout) {
+        debug("connect to harmony hub with discovery object");
+        const { fullHubInfo } = discovery;
+        this._remoteId = fullHubInfo ? fullHubInfo.remoteId : undefined;
+        const hubip = discovery.ip;
+        // if we were able to find the remote id, connect to the hub. otherwise,
+        // fallback to the default connect mechanism.
+        return this._remoteId ? this._connect(hubip) : this.connect(hubip, timeout);
+    }
+    _getRemoteId(hubip, timeout) {
         const payload = {
             url: 'http://' + hubip + ':8088',
             method: 'POST',
-            timeout: 5000,
+            timeout: timeout || 5000,
             headers: {
                 'Content-type': 'application/json',
                 Accept: 'text/plain',

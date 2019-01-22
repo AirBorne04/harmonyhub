@@ -11,13 +11,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const harmonyclient_1 = require("./harmonyclient");
 var harmonyclient_2 = require("./harmonyclient");
 exports.HarmonyClient = harmonyclient_2.HarmonyClient;
-function getHarmonyClient(hubhost, hubport) {
+function getHarmonyClient(hubhost, timeout) {
     return __awaiter(this, void 0, void 0, function* () {
         // make new harmony hub client
         const harmonyClient = new harmonyclient_1.HarmonyClient();
-        yield harmonyClient.connect(hubhost);
+        yield harmonyClient.connect(hubhost, timeout);
         return harmonyClient;
     });
 }
 exports.getHarmonyClient = getHarmonyClient;
+function getHarmonyClientWithDiscovery(discovery, timeout) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // make new harmony hub client from discovery object
+        const harmonyClient = new harmonyclient_1.HarmonyClient();
+        yield harmonyClient.connectWithDiscovery(discovery, timeout);
+        return harmonyClient;
+    });
+}
+exports.getHarmonyClientWithDiscovery = getHarmonyClientWithDiscovery;
 exports.default = getHarmonyClient;
