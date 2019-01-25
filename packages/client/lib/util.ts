@@ -1,4 +1,4 @@
-var IQ = require("node-xmpp-stanza").IQ;
+import { IQ } from 'node-xmpp-stanza';
 
 function getUniqueId(): number {
   return Math.floor(Math.random() * 1000000);
@@ -8,15 +8,15 @@ function getUniqueId(): number {
  * Splits a response from the hub (usualy seperated by ":" and "=") into a
  * proper javascript object.
  */
-function decodeColonSeparatedResponse(response: string): Object {
-  var result: Object;
+function decodeColonSeparatedResponse(response: string): object {
+  let result: object;
 
-  if (response && typeof response === "string") {
-    var pairs: Array<string> = response.split(":") || [response];
+  if (response && typeof response === 'string') {
+    const pairs: Array<string> = response.split(':') || [response];
     result = {};
 
-    pairs.forEach(function (pair) {
-      var keyValue = pair.split("=");
+    pairs.forEach((pair) => {
+      const keyValue = pair.split('=');
 
       if (keyValue.length === 2) {
         result[keyValue[0]] = keyValue[1];
@@ -28,13 +28,13 @@ function decodeColonSeparatedResponse(response: string): Object {
 }
 
 function buildIqStanza(type: string, xmlns: string, mime: string, body: string, from?: string) {
-  var iq = new IQ({
+  const iq = new IQ({
     type,
     id: getUniqueId(),
     from
   });
 
-  iq.c("oa", {
+  iq.c('oa', {
     xmlns,
     mime
   }).t(body);

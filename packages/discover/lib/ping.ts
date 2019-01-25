@@ -1,11 +1,10 @@
-import autobind from "autobind-decorator";
+import autobind from 'autobind-decorator';
 
-import * as logger from "debug";
-var debug = logger("harmonyhub:discover:ping");
+import * as logger from 'debug';
+const debug = logger('harmonyhub:discover:ping');
 
-import * as dgram from "dgram";
-import * as os from "os";
-
+import * as dgram from 'dgram';
+import * as os from 'os';
 
 export class PingOptions {
   port?: number;
@@ -16,16 +15,16 @@ export class PingOptions {
 function generateBroadcastIp(): Array<string> {
 
   if (!/^win/i.test(process.platform)) {
-    debug("We are running non windows so just broadcast");
-    return ["255.255.255.255"];
+    debug('We are running non windows so just broadcast');
+    return ['255.255.255.255'];
   }
 
-  debug("We are running on windows so we try to find the local ip address to fix a windows broadcast protocol bug");
-  var ifaces = os.networkInterfaces(),
-      possibleIps = [];
+  debug('We are running on windows so we try to find the local ip address to fix a windows broadcast protocol bug');
+  const ifaces = os.networkInterfaces(),
+        possibleIps = [];
 
-  Object.keys(ifaces).forEach(function (ifname) {
-    ifaces[ifname].forEach(function (iface) {
+  Object.keys(ifaces).forEach((ifname) => {
+    ifaces[ifname].forEach((iface) => {
       // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
       if ('IPv4' !== iface.family || iface.internal !== false) {
         return;
@@ -36,12 +35,12 @@ function generateBroadcastIp(): Array<string> {
   });
 
   return possibleIps.filter((ip) => {
-    return ip.indexOf("192.") == 0;
+    return ip.indexOf('192.') === 0;
   }).map((ip) => {
-    var nums = ip.split(".");
+    const nums = ip.split('.');
     nums[3] = 255;
-    debug("Fallback to local ip address -> " + nums.join);
-    return nums.join(".");
+    debug('Fallback to local ip address -> ' + nums.join('.'));
+    return nums.join('.');
   });
 
 }
@@ -63,8 +62,8 @@ export class Ping {
     // try to find an ip address that is in a local (home) network
     options = options || {};
     options.address = options.address || generateBroadcastIp();
-    
-    if (typeof options.address == "string") {
+
+    if (typeof options.address === 'string') {
       options.address = [options.address as string];
     }
 
@@ -73,7 +72,7 @@ export class Ping {
     this.options = {
       ...{
         port: 5224,
-        interval: 1000
+        interval: 2000
       },
       ...options
     };
@@ -90,17 +89,17 @@ export class Ping {
    * emit a broadcast into the network.
    */
   emit(): void {
-    debug("emit()");
+    debug('emit()');
 
     // emit to all the addresses
     (this.options.address as Array<string>).forEach(
-      address => this.socket.send(
+      (address) => this.socket.send(
         this.messageBuffer, 0,
         this.message.length, this.options.port,
         address,
         (err) => {
           if (err) {
-            debug("error emitting ping. stopping now :( (" + err + ")");
+            debug(`error emitting ping. stopping now :( (${err})`);
             this.stop();
           }
         })
@@ -111,15 +110,15 @@ export class Ping {
    * Start an interval emitting broadcasts into the network.
    */
   start(): void {
-    debug("start()");
+    debug('start()');
 
     if (this.socket) {
-      debug("Ping is already running, call stop() first");
+      debug('Ping is already running, call stop() first');
       return;
     }
     // setup socket to broadcast messages from the incoming ping
     // unref so that the app can close
-    this.socket = dgram.createSocket("udp4");
+    this.socket = dgram.createSocket('udp4');
     this.socket.bind(this.portToAnnounce, () => {
       // this.options.port,  -> forget this bind no need to care from which port the data was send??
       this.socket.setBroadcast(true);
@@ -134,10 +133,10 @@ export class Ping {
    * Stop broadcasting into the network.
    */
   stop(): void {
-    debug("stop()");
+    debug('stop()');
 
-    if (this.intervalToken == undefined) {
-      debug("ping has already been stopped, call start() first");
+    if (this.intervalToken === undefined) {
+      debug('ping has already been stopped, call start() first');
       return;
     }
 
@@ -154,7 +153,7 @@ export class Ping {
    * Return an indicator it this ping is currently running.
    */
   isRunning(): boolean {
-    debug("isRunning()");
+    debug('isRunning()');
     return (this.intervalToken !== undefined);
   }
 }

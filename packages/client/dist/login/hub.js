@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const logger = require("debug");
-var debug = logger("harmonyhub:client:login:hub");
+const debug = logger('harmonyhub:client:login:hub');
 const node_xmpp_client_1 = require("node-xmpp-client");
 // import { Client as ClientNew } from "@xmpp/client";
 const util_1 = require("../util");
@@ -15,43 +15,44 @@ const util_1 = require("../util");
  *                     this is set to 5222.
  */
 function getIdentity(hubhost, hubport = 5222) {
-    debug("retrieve identity by logging in as guest");
+    debug('retrieve identity by logging in as guest');
     // guest@x.com / guest
     // guest@connect.logitech.com/gatorade
     return new Promise((resolve, reject) => {
-        var iqId, xmppClient = new node_xmpp_client_1.Client({
-            jid: "guest@x.com/gatorade",
-            password: "guest",
+        const xmppClient = new node_xmpp_client_1.Client({
+            jid: 'guest@x.com/gatorade',
+            password: 'guest',
             host: hubhost,
             port: hubport,
             disallowTLS: true
         });
-        xmppClient.on("online", function () {
-            debug("XMPP client connected");
-            var body = "method=pair:name=harmonyjs#iOS6.0.1#iPhone";
-            var iq = util_1.default.buildIqStanza("get", "connect.logitech.com", "vnd.logitech.connect/vnd.logitech.pair", body, "guest");
-            iqId = iq.attr("id");
+        let iqId;
+        xmppClient.on('online', () => {
+            debug('XMPP client connected');
+            const body = 'method=pair:name=harmonyjs#iOS6.0.1#iPhone';
+            const iq = util_1.default.buildIqStanza('get', 'connect.logitech.com', 'vnd.logitech.connect/vnd.logitech.pair', body, 'guest');
+            iqId = iq.attr('id');
             xmppClient.send(iq);
         });
-        xmppClient.on("error", function (e) {
-            debug("XMPP client error", e);
+        xmppClient.on('error', (e) => {
+            debug('XMPP client error', e);
             xmppClient.end();
             reject(e);
         });
-        xmppClient.on("stanza", function (stanza) {
-            debug("received XMPP stanza: " + stanza);
+        xmppClient.on('stanza', (stanza) => {
+            debug('received XMPP stanza: ' + stanza);
             if (stanza.attrs.id === iqId.toString()) {
-                var body = stanza.getChildText("oa");
-                var response = util_1.default.decodeColonSeparatedResponse(body);
+                const body = stanza.getChildText('oa');
+                const response = util_1.default.decodeColonSeparatedResponse(body);
                 if (response.identity && response.identity !== undefined) {
-                    debug("received identity token: " + response.identity);
+                    debug('received identity token: ' + response.identity);
                     xmppClient.end();
                     resolve(response.identity);
                 }
                 else {
-                    debug("could not find identity token");
+                    debug('could not find identity token');
                     xmppClient.end();
-                    reject(new Error("Did not retrieve identity."));
+                    reject(new Error('Did not retrieve identity.'));
                 }
             }
         });
@@ -68,24 +69,24 @@ function getIdentity(hubhost, hubport = 5222) {
  * passes that XMPP client.
  */
 function loginWithIdentity(identity, hubhost, hubport) {
-    debug("create xmpp client using retrieved identity token: " + identity);
+    debug('create xmpp client using retrieved identity token: ' + identity);
     return new Promise((resolve, reject) => {
-        var jid = identity + "@connect.logitech.com/gatorade", password = identity, xmppClient = new node_xmpp_client_1.Client({
-            jid: jid,
-            password: password,
+        const jid = identity + '@connect.logitech.com/gatorade', password = identity, xmppClient = new node_xmpp_client_1.Client({
+            jid,
+            password,
             host: hubhost,
             port: hubport,
             disallowTLS: true,
             reconnect: true
         });
         // xmppClientNew = new ClientNew();
-        xmppClient.on("error", function (e) {
-            debug("XMPP login error", e);
+        xmppClient.on('error', (e) => {
+            debug('XMPP login error', e);
             xmppClient.end();
             reject(e);
         });
-        xmppClient.once("online", function () {
-            debug("XMPP client connected using identity token");
+        xmppClient.once('online', () => {
+            debug('XMPP client connected using identity token');
             resolve(xmppClient);
         });
         // xmppClientNew.on("error", function (e) {
@@ -111,11 +112,11 @@ function loginWithIdentity(identity, hubhost, hubport) {
  * which can be used to communicate with the Harmony hub.
  */
 function loginToHub(hubhost, hubport) {
-    debug("perform hub login");
+    debug('perform hub login');
     hubport = hubport || 5222;
     return getIdentity(hubhost, hubport)
-        .then(function (identity) {
-        debug("first step is done now login with identity");
+        .then((identity) => {
+        debug('first step is done now login with identity');
         return loginWithIdentity(identity, hubhost, hubport);
     });
 }

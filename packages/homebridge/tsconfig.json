@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "es6",
-    "lib": ["es6"],
+    "lib": ["es6", "dom"],
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "paths": {
+      "@harmonyhub/*": ["../*"]
+    }
   },
   "include": [
     "lib/**/*"
@@ -13,6 +17,7 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
-    "./dist/**/*"
+    "./dist/**/*",
+    "../client-ws"
   ]
 }

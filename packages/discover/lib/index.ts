@@ -1,1 +1,1 @@
-export { Explorer, HubData } from "./explorer";
+export { Explorer, IHubData as HubData } from './explorer';

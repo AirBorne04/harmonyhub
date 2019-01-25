@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const logger = require("debug");
-var debug = logger("harmonyhub:client:login");
+const debug = logger('harmonyhub:client:login');
 const hub_1 = require("./hub");
 /** Function: login
  * Retrieves a UserAuthToken using a guest Harmony account and logs into a

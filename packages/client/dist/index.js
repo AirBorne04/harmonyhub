@@ -14,7 +14,7 @@ var harmonyclient_2 = require("./harmonyclient");
 exports.HarmonyClient = harmonyclient_2.HarmonyClient;
 function getHarmonyClient(hubhost, hubport) {
     return __awaiter(this, void 0, void 0, function* () {
-        var xmppClient = yield login_1.login(hubhost, hubport);
+        const xmppClient = yield login_1.login(hubhost, hubport);
         return new harmonyclient_1.HarmonyClient(xmppClient);
     });
 }

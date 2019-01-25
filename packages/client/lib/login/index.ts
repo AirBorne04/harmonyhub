@@ -1,7 +1,7 @@
-import * as logger from "debug";
-var debug = logger("harmonyhub:client:login");
+import * as logger from 'debug';
+const debug = logger('harmonyhub:client:login');
 
-import { loginToHub } from "./hub";
+import { loginToHub } from './hub';
 
 /** Function: login
  * Retrieves a UserAuthToken using a guest Harmony account and logs into a

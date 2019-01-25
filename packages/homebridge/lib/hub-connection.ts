@@ -1,107 +1,82 @@
-import { Explorer } from "@harmonyhub/discover";
-import { EventEmitter } from "events";
-import autobind from "autobind-decorator";
+import { getHarmonyClient, HarmonyClient } from '@harmonyhub/client-ws';
+import { Explorer, Explorer as Discover, HubData } from '@harmonyhub/discover';
 
-import { getHarmonyClient as Client } from "@harmonyhub/client";
-import { HarmonyClient } from "@harmonyhub/client/dist/harmonyclient";
-
-// var Queue = require('queue');
-// var Promise = require('bluebird');
-// var BluebirdExt = require('./bluebird-ext');
+import autobind from 'autobind-decorator';
+import { EventEmitter } from 'events';
 
 export const HubConnectionEvents = {
-	ConnectionChanged: 'connectionChanged',
-	StateDigest: 'stateDigest'
+  CONNECTION_CHANGED: 'connectionChanged',
+  STATE_DIGEST: 'stateDigest'
 };
 
 export enum HubConnectionStatus {
-	Unknown,
-	Connecting,
-	Connected,
-	PendingConnection,
-	Disconnected
-};
+  UNKNOWN,
+  CONNECTING,
+  CONNECTED,
+  DISCONNECTED
+}
 
 @autobind
 export class HubConnection extends EventEmitter {
 
-  get status():HubConnectionStatus {
-    if (this.client) return HubConnectionStatus.Connected;
-    if (this._connTask) return HubConnectionStatus.Connecting;
-    // if (this.queue) return ConnectionStatus.PendingConnection;
-    if (this.hubInfo) return HubConnectionStatus.Disconnected;
-    return HubConnectionStatus.Unknown;
-  }
-
   log: any;
-  // hubId: string;
-  hubInfo: {uuid, ip};
-  _discover: Explorer;
+  hubInfo: HubData;
+  discover: Explorer;
 
   client: HarmonyClient;
-  // queue;
-  _connTask: Promise<HarmonyClient>;
-  _lastStatus: HubConnectionStatus;
+  clientPromise: Promise<HarmonyClient>;
 
-  static createAsync(hubInfo: {uuid, ip}, log, discover: Explorer): Promise<HubConnection> {
-    var conn = new HubConnection(hubInfo, log, discover);
+  status = HubConnectionStatus.UNKNOWN;
+
+  static async createAsync(hubInfo: HubData, log, discover: Explorer): Promise<HubConnection> {
+    const conn = new HubConnection(hubInfo, log, discover);
+    // tslint:disable-next-line:no-console
     conn.on('error', console.error);
-  
-    return conn.connectAsync(hubInfo).then(
-      client => conn
-    );
+    await conn.connect(hubInfo);
+    return conn;
   }
 
-  constructor(hubInfo: {uuid, ip}, log, discover: Explorer) {
+  constructor(hubInfo: HubData, log, discover: Explorer) {
     super();
-    
-    //this.hubId = hubInfo.uuid;
+
     this.hubInfo = hubInfo;
     this.log = log;
-    this._discover = discover;
+    this.discover = discover;
 
-    this._discover.on('online', info => {
-      if (!info || info.uuid != this.hubInfo.uuid) {
+    this.discover.on(Explorer.Events.ONLINE, (info: HubData) => {
+      if (!info || info.uuid !== this.hubInfo.uuid) {
         return;
       }
-      this.handleConnectionOnline();
+      this.handleHubOnline();
     });
 
-    this._discover.on('offline', info => {
-      if (!info || info.uuid != this.hubInfo.uuid) {
+    this.discover.on(Explorer.Events.OFFLINE, (info: HubData) => {
+      if (!info || info.uuid !== this.hubInfo.uuid) {
         return;
       }
-      this.handleConnectionOffline();
+      this.handleHubOffline();
     });
   }
 
-  connectAsync(hubInfo): Promise<HarmonyClient> {
+  async connect(hubInfo: HubData): Promise<HarmonyClient> {
     this.hubInfo = hubInfo;
-    
-    // if client is available drop it
+
+    // if client is available -> disconnect
     if (this.client) {
+      await this.disconnect();
+    }
+
+    this.emitConnectionChanged(HubConnectionStatus.DISCONNECTED);
+    return this.getClient();
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.client) {
+      this.client.removeAllListeners(HarmonyClient.Events.STATE_DIGEST);
+      this.client.removeAllListeners(HarmonyClient.Events.DISCONNECTED);
       this.client.end();
       this.client = null;
-    }
-    
-    // this.queue = new Queue();
-    // this.queue.concurrency = 1;
-    return this.refreshAsync();
-  }
-
-  disconnectAsync() {
-    var lastClient = this.client;
-    // var lastQueue = this.queue;
-    // this.queue = null;
-    this.client = null;
-    this.emitConnectionChanged();
-
-    //TODO: Properly cancel running tasks
-    // if (lastQueue) {
-    //   lastQueue.end();
-    // }
-    if (lastClient) {
-      lastClient.end();
+      this.emitConnectionChanged(HubConnectionStatus.DISCONNECTED);
     }
     return Promise.resolve();
   }
@@ -111,129 +86,85 @@ export class HubConnection extends EventEmitter {
    * this one is returned otherwise a new connection is made.
    * An error is thrown if the connection could not be established.
    */
-  getClient(): Promise<HarmonyClient> {
-    // check if client is already connected
-    var client = this.client;
-    if (client) {
-      return Promise.resolve(client);
+  async getClient(): Promise<HarmonyClient> {
+    // check if client is connected
+    if (this.client) {
+      return Promise.resolve(this.client);
     }
-    // check if connection is currently established
-    var connTask:Promise<HarmonyClient> = this._connTask;
-    if (connTask) {
-      return connTask;
+    // check if client is connecting
+    if (this.clientPromise) {
+      return this.clientPromise;
     }
-    // start the connection task
-    connTask = Client(this.hubInfo.ip, undefined)
-      .then((client:HarmonyClient) => {
-        this.log.debug('created new client for hub with uuid ' + this.hubInfo.uuid);
-  
-        client._xmppClient.on('offline', this.handleConnectionOffline);
-  
-        client.on('stateDigest', (stateDigest) => {
-          this.log.debug('got state digest. reemit it');
-          this.emit(HubConnectionEvents.StateDigest, {
-            stateDigest: stateDigest
-          });
-        });
 
-        // daniels new way to clean old connection
-        this.client = client;
-        this._connTask = null;
-        this.emitConnectionChanged();
+    return this.makeClient();
+  }
 
-        return this.client;
-      });
+  async makeClient(): Promise<HarmonyClient> {
+    // make a connection (with a timeout of 30 seconds)
+    this.emitConnectionChanged(HubConnectionStatus.CONNECTING);
+    this.clientPromise = Promise.race([
+      getHarmonyClient(this.hubInfo.ip),
+      () => new Promise<any>((resolve, reject) => {
+        setTimeout(resolve, 30 * 1000);
+      })
+    ]).then(
+      (newClient) => {
+        this.clientPromise = null;
+        return newClient as HarmonyClient;
+      }
+    );
 
-    // save connection attempt and update connection status
-    this._connTask = connTask;
-    this.emitConnectionChanged();
+    this.client = await this.clientPromise;
+
+    if (this.client === null) {
+      this.emitConnectionChanged(HubConnectionStatus.DISCONNECTED);
+      return null;
+    }
+
+    this.log.debug('created new client for hub with uuid ' + this.hubInfo.uuid);
+
+    this.client.on(
+      HarmonyClient.Events.DISCONNECTED,
+      this.handleHubOffline
+    );
+
+    this.client.on(
+      HarmonyClient.Events.STATE_DIGEST,
+      (stateDigest) => {
+        this.log.debug('got state digest. reemit it');
+        this.emit(HubConnectionEvents.STATE_DIGEST, stateDigest);
+      }
+    );
+
+    // update connection status
+    this.emitConnectionChanged(HubConnectionStatus.CONNECTED);
 
     // set a timeout for this to return
-    return Promise.race([
-        connTask,
-        () => new Promise((resolve, reject) => {
-            setTimeout(resolve, 30 * 1000);
-          }
-        )
-      ])
-      .catch((err) => {
-        this.log("error during hub connection " + err)
-      })
-      .then((client) => {
-        if (this._connTask == connTask) {
-          this._connTask = null;
-        }
-        this.emitConnectionChanged();
-
-        if (!client) {
-          throw new Error("No client currently available");
-        }
-
-        return client as HarmonyClient;
-      });
+    return this.client;
   }
 
-  handleConnectionOnline() {
-    this.log.debug("Hub went online: " + this.hubInfo.uuid);
-    return this.refresh();
+  async handleHubOnline() {
+    this.log.debug(`Hub went online: ${this.hubInfo.uuid}`);
+    this.makeClient();
   }
 
-  handleConnectionOffline() {
-    this.log.debug('client for hub ' + this.hubInfo.uuid + ' went offline. re-establish.');
-    
-    this.client.end();
-    this.client = undefined;
-    
-    return this.refresh();
+  // here we handle a hub going offline
+  async handleHubOffline() {
+    this.log.debug(`hub ${this.hubInfo.uuid} went offline.`);
+    await this.disconnect();
   }
 
-  refresh(): Promise<void | HarmonyClient> {
-    return this.refreshAsync()
-      .catch((err) => {
-        this.log.debug(err);
-        this.emitConnectionChanged();
-      });
+  // here we handle a client loosing connection and try to reconnect
+  async handleHubDisconnected() {
+    this.log.debug(`client for hub ${this.hubInfo.uuid} was disconnected. re-establish.`);
+    await this.disconnect();
+    this.makeClient();
   }
 
-  refreshAsync(): Promise<HarmonyClient> {
-    this.emitConnectionChanged();
-    return this.getClient();
-        
-    // this.invokeAsync(function(client){
-    //   return client;
-    // });
-  }
-
-  emitConnectionChanged() {
-    // no change no event
-    if (this._lastStatus == this.status) {
-      return;
+  emitConnectionChanged(status: HubConnectionStatus) {
+    if (status) {
+      this.status = status;
+      this.emit(HubConnectionEvents.CONNECTION_CHANGED, status);
     }
-    this._lastStatus = this.status;
-    this.emit(HubConnectionEvents.ConnectionChanged, this.status);
   }
-
-  // invokeAsync(func) {
-  //   var self = this;
-  //   return new Promise(function(resolve, reject) {
-  //     self.queue.push(resolve);
-  //     startQueueInBackground(self.queue);
-  //   })
-  //   .then(function(cb){
-  //     return self._getClientAsync()
-  //       .then(BluebirdExt.asBlueBird(func))
-  //       .finally(function(){
-  //         setTimeout(cb, 0);
-  //       })
-  //       .catch(function(err){
-  //         throw err;
-  //       });
-  //   });
-  // }
 }
-
-// var startQueueInBackground = function(queue) {
-// 	if (queue && !queue.running) {
-// 		setTimeout(queue.start.bind(queue), 0);
-// 	}
-// };

@@ -9,21 +9,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Explorer_1;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
-var debug = logger("harmonyhub:discover:explorer");
+const debug = logger('harmonyhub:discover:explorer');
 const events_1 = require("events");
 const ping_1 = require("./ping");
 const responseCollector_1 = require("./responseCollector");
 function deserializeResponse(response) {
-    var pairs = {};
-    response.split(";")
+    const pairs = {};
+    response.split(';')
         .forEach((rawPair) => {
-        var splitted = rawPair.split(":");
+        const splitted = rawPair.split(':');
         pairs[splitted[0]] = splitted[1];
     });
     return {
-        uuid: pairs["uuid"],
-        ip: pairs["ip"],
-        friendlyName: pairs["friendlyName"],
+        uuid: pairs.uuid,
+        ip: pairs.ip,
+        friendlyName: pairs.friendlyName,
         fullHubInfo: pairs,
         lastSeen: Date.now()
     };
@@ -41,16 +41,16 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
         super();
         this.knownHubs = new Map();
         this.port = incomingPort;
-        debug("Explorer(" + this.port + ")");
+        debug(`Explorer(${this.port})`);
         this.ping = new ping_1.Ping(this.port, pingOptions);
     }
     /**
      * Inits the listening for hub replies, and starts broadcasting.
      */
     start() {
-        debug("start()");
+        debug('start()');
         this.responseCollector = new responseCollector_1.ResponseCollector(this.port);
-        this.responseCollector.on("response", this.handleResponse);
+        this.responseCollector.on('response', this.handleResponse);
         this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 5000);
         this.responseCollector.start();
         this.ping.start();
@@ -59,7 +59,7 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
      * Stop the emitting of broadcasts and disassamble all listeners.
      */
     stop() {
-        debug("stop()");
+        debug('stop()');
         this.ping.stop();
         this.responseCollector.stop();
         clearInterval(this.cleanUpIntervalToken);
@@ -70,9 +70,9 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
      * @param data
      */
     handleResponse(data) {
-        var hub = deserializeResponse(data);
+        const hub = deserializeResponse(data);
         if (this.knownHubs.get(hub.uuid) === undefined) {
-            debug("discovered new hub " + hub.friendlyName);
+            debug(`discovered new hub ${hub.friendlyName}`);
             this.knownHubs.set(hub.uuid, hub);
             this.emit(Explorer_1.Events.ONLINE, hub);
             this.emit(Explorer_1.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));
@@ -86,12 +86,12 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
      * are no longer tracked and discharged. Also emits the offline and update events.
      */
     executeCleanUp() {
-        debug("executeCleanUp()");
-        var now = Date.now();
+        debug('executeCleanUp()');
+        const now = Date.now();
         Array.from(this.knownHubs.values()).forEach((hub) => {
-            var diff = now - hub.lastSeen;
+            const diff = now - hub.lastSeen;
             if (diff > 5000) {
-                debug("hub at " + hub.ip + " seen last " + diff + "ms ago. clean up and tell subscribers that we lost that one.");
+                debug(`hub at ${hub.ip} seen last ${diff}ms ago. clean up and tell subscribers that we lost that one.`);
                 this.knownHubs.delete(hub.uuid);
                 this.emit(Explorer_1.Events.OFFLINE, hub);
                 this.emit(Explorer_1.Events.UPDATE, arrayOfKnownHubs(this.knownHubs));

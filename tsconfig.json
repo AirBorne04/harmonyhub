@@ -1,8 +1,16 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@harmonyhub/*": ["./packages/*"]
+    },
+    "plugins": [
+      { "name": "typescript-tslint-plugin" }
+    ],
     "target": "es6",
-    "lib": ["es6"],
+    "lib": ["es6", "dom"],
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "outDir": "./examples-build",
     "experimentalDecorators": true,

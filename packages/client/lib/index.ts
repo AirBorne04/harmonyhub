@@ -4,7 +4,7 @@ import { HarmonyClient } from './harmonyclient';
 export { HarmonyClient } from './harmonyclient';
 
 export async function getHarmonyClient(hubhost: string, hubport?: number): Promise<HarmonyClient> {
-  var xmppClient = await login(hubhost, hubport);
+  const xmppClient = await login(hubhost, hubport);
   return new HarmonyClient(xmppClient);
 }
 

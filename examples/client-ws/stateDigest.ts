@@ -1,6 +1,7 @@
-import { getHarmonyClient, HarmonyClient } from '../../packages/client-ws';
+import { getHarmonyClient, HarmonyClient } from '@harmonyhub/client-ws';
 
 const hubIp = '192.168.0.30';
+
 async function run() {
   const harmonyClient = await getHarmonyClient(hubIp);
 
@@ -11,10 +12,10 @@ async function run() {
         console.log(digest);
         console.log(
           `activity -> ${digest.activityId} is -> ${digest.activityStatus}`
-        )
+        );
       }
     );
-  } catch(error) {
+  } catch (error) {
     console.error(`Error ${error.message}`);
   }
 
@@ -24,5 +25,5 @@ async function run() {
 }
 
 run().catch(
-  err => console.log(err)
+  (err) => console.log(err)
 );

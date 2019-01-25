@@ -1,7 +1,7 @@
-import { getHarmonyClient } from '../../packages/client-ws/dist';
+import { getHarmonyClient } from '@harmonyhub/client-ws';
 
 async function run() {
-  const harmonyClient = await getHarmonyClient("192.168.0.30");
+  const harmonyClient = await getHarmonyClient('192.168.0.30');
 
   try {
     // get all activities
@@ -9,10 +9,10 @@ async function run() {
     console.log(
       'available activities',
       activities.map(
-        activity => activity.label
+        (activity) => activity.label
       )
     );
-    
+
     // get all devices
     const commands = await harmonyClient.getAvailableCommands();
     console.log(
@@ -24,21 +24,21 @@ async function run() {
 
     // print television functions
     const tv = commands.device.find(
-      dev => dev.type === 'Television'
+      (dev) => dev.type === 'Television'
     );
     console.log(
       'Functions for television',
       tv.controlGroup.map(
-        (control) => `${control.name} [${control.function.map(func => func.name)}]`
+        (control) => `${control.name} [${control.function.map((func) => func.name)}]`
       )
     );
 
     harmonyClient.end();
-  } catch(error) {
+  } catch (error) {
     console.error('Error', error.message);
   }
 }
 
 run().catch(
-  err => console.log(err)
+  (err) => console.log(err)
 );

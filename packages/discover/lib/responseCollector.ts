@@ -1,11 +1,10 @@
-import autobind from "autobind-decorator";
+import autobind from 'autobind-decorator';
 
-import * as logger from "debug";
-var debug = logger("harmonyhub:discover:responsecollector");
+import * as logger from 'debug';
+const debug = logger('harmonyhub:discover:responsecollector');
 
-import { EventEmitter } from "events";
-import * as net from "net";
-
+import { EventEmitter } from 'events';
+import * as net from 'net';
 
 @autobind
 export class ResponseCollector extends EventEmitter {
@@ -30,22 +29,22 @@ export class ResponseCollector extends EventEmitter {
    * response when the message is done.
    */
   start(): void {
-    debug("start()");
+    debug('start()');
 
     this.server = net.createServer((socket) => {
-      debug("handle new connection");
+      debug('handle new connection');
 
-      var buffer = "";
+      let buffer = '';
 
-      socket.on("data", (data) => {
-        debug("received data chunk");
+      socket.on('data', (data) => {
+        debug('received data chunk');
         buffer += data.toString();
       });
 
-      socket.on("end", () => {
-        debug("connection closed. emitting data.");
-        this.emit("response", buffer);
-      })
+      socket.on('end', () => {
+        debug('connection closed. emitting data.');
+        this.emit(ResponseCollector.Events.RESPONSE, buffer);
+      });
     }).listen(this.port);
   }
 
@@ -53,12 +52,18 @@ export class ResponseCollector extends EventEmitter {
    * Close the tcp server.
    */
   stop() {
-    debug("stop()");
+    debug('stop()');
 
     if (this.server) {
       this.server.close();
     } else {
-      debug("not running");
+      debug('not running');
     }
+  }
+}
+
+export namespace ResponseCollector {
+  export enum Events {
+    RESPONSE = 'response'
   }
 }

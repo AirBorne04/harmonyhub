@@ -8,7 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
-var debug = logger("harmonyhub:discover:responsecollector");
+const debug = logger('harmonyhub:discover:responsecollector');
 const events_1 = require("events");
 const net = require("net");
 let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
@@ -26,17 +26,17 @@ let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
      * response when the message is done.
      */
     start() {
-        debug("start()");
+        debug('start()');
         this.server = net.createServer((socket) => {
-            debug("handle new connection");
-            var buffer = "";
-            socket.on("data", (data) => {
-                debug("received data chunk");
+            debug('handle new connection');
+            let buffer = '';
+            socket.on('data', (data) => {
+                debug('received data chunk');
                 buffer += data.toString();
             });
-            socket.on("end", () => {
-                debug("connection closed. emitting data.");
-                this.emit("response", buffer);
+            socket.on('end', () => {
+                debug('connection closed. emitting data.');
+                this.emit('response', buffer);
             });
         }).listen(this.port);
     }
@@ -44,12 +44,12 @@ let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
      * Close the tcp server.
      */
     stop() {
-        debug("stop()");
+        debug('stop()');
         if (this.server) {
             this.server.close();
         }
         else {
-            debug("not running");
+            debug('not running');
         }
     }
 };

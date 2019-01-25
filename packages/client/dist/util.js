@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var IQ = require("node-xmpp-stanza").IQ;
+const node_xmpp_stanza_1 = require("node-xmpp-stanza");
 function getUniqueId() {
     return Math.floor(Math.random() * 1000000);
 }
@@ -9,12 +9,12 @@ function getUniqueId() {
  * proper javascript object.
  */
 function decodeColonSeparatedResponse(response) {
-    var result;
-    if (response && typeof response === "string") {
-        var pairs = response.split(":") || [response];
+    let result;
+    if (response && typeof response === 'string') {
+        const pairs = response.split(':') || [response];
         result = {};
-        pairs.forEach(function (pair) {
-            var keyValue = pair.split("=");
+        pairs.forEach((pair) => {
+            const keyValue = pair.split('=');
             if (keyValue.length === 2) {
                 result[keyValue[0]] = keyValue[1];
             }
@@ -23,12 +23,12 @@ function decodeColonSeparatedResponse(response) {
     return result;
 }
 function buildIqStanza(type, xmlns, mime, body, from) {
-    var iq = new IQ({
+    const iq = new node_xmpp_stanza_1.IQ({
         type,
         id: getUniqueId(),
         from
     });
-    iq.c("oa", {
+    iq.c('oa', {
         xmlns,
         mime
     }).t(body);

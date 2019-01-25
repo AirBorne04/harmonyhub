@@ -17,9 +17,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var HarmonyClient_1;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
-var debug = logger("harmonyhub:client:harmonyclient");
-const util_1 = require("./util");
+const debug = logger('harmonyhub:client:harmonyclient');
 const events_1 = require("events");
+const util_1 = require("./util");
 /**
  * Creates a new HarmonyClient using the given xmppClient to communicate.
  * @param xmppClient
@@ -27,36 +27,37 @@ const events_1 = require("events");
 let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.EventEmitter {
     constructor(xmppClient) {
         super();
-        debug("create new harmony client");
-        this._xmppClient = xmppClient;
-        this._responseHandlerQueue = [];
+        debug('create new harmony client');
+        this.xmppClient = xmppClient;
+        this.responseHandlerQueue = [];
         this.emit(HarmonyClient_1.Events.CONNECTED);
-        xmppClient.on("stanza", this.handleStanza);
-        xmppClient.on("close", this.emit(HarmonyClient_1.Events.DISCONNECTED));
-        xmppClient.on("error", function (error) {
-            debug("XMPP Error: " + error.message);
+        xmppClient.on('stanza', this.handleStanza);
+        xmppClient.on('close', this.emit(HarmonyClient_1.Events.DISCONNECTED));
+        xmppClient.on('error', (error) => {
+            debug('XMPP Error: ' + error.message);
         });
     }
     handleStanza(stanza) {
-        debug("handleStanza(" + stanza.toString() + ")");
+        debug('handleStanza(' + stanza.toString() + ')');
         // Check for state digest:
-        var event = stanza.getChild("event");
-        if (event && event.attr("type") === "connect.stateDigest?notify") {
+        const event = stanza.getChild('event');
+        if (event && event.attr('type') === 'connect.stateDigest?notify') {
             this.onStateDigest(JSON.parse(event.getText()));
         }
         // Check for queued response handlers:
-        this._responseHandlerQueue.forEach(function (responseHandler, index, array) {
+        this.responseHandlerQueue.forEach((responseHandler, index, array) => {
             if (responseHandler.canHandleStanza(stanza)) {
-                debug("received response stanza for queued response handler");
-                var response = stanza.getChildText("oa"), oa = stanza.getChild("oa"), decodedResponse;
-                if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode != 200) {
+                debug('received response stanza for queued response handler');
+                const response = stanza.getChildText('oa'), oa = stanza.getChild('oa');
+                let decodedResponse;
+                if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode !== 200) {
                     responseHandler.rejectCallback({
                         code: oa.attrs.errorcode,
                         message: oa.attrs.errorstring
                     });
                 }
                 else {
-                    if (responseHandler.responseType === "json") {
+                    if (responseHandler.responseType === 'json') {
                         decodedResponse = JSON.parse(response);
                     }
                     else {
@@ -73,7 +74,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * @param {message} stateDigest
      */
     onStateDigest(stateDigest) {
-        debug("received state digest");
+        debug('received state digest');
         this.emit(HarmonyClient_1.Events.STATE_DIGEST, stateDigest);
     }
     /**
@@ -83,9 +84,9 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     getCurrentActivity() {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve current activity");
-            return this.request("getCurrentActivity")
-                .then(function (response) {
+            debug('retrieve current activity');
+            return this.request('getCurrentActivity')
+                .then((response) => {
                 return response.result;
             });
         });
@@ -95,9 +96,9 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     getActivities() {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve activities");
+            debug('retrieve activities');
             return this.getAvailableCommands()
-                .then(function (availableCommands) {
+                .then((availableCommands) => {
                 return availableCommands.activity;
             });
         });
@@ -107,17 +108,17 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     startActivity(activityId) {
         return __awaiter(this, void 0, void 0, function* () {
-            var timestamp = new Date().getTime();
-            var body = "activityId=" + activityId + ":timestamp=" + timestamp;
-            return this.request("startactivity", body, "encoded", (stanza) => {
+            const timestamp = new Date().getTime(), body = `activityId=${activityId}:timestamp=${timestamp}`;
+            return this.request('startactivity', body, 'encoded', (stanza) => {
                 // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
-                var event = stanza.getChild("event"), canHandleStanza = false;
-                if (event && event.attr("type") === "connect.stateDigest?notify") {
-                    var digest = JSON.parse(event.getText());
-                    if (activityId === "-1" && digest.activityId === activityId && digest.activityStatus === 0) {
+                const event = stanza.getChild('event');
+                let canHandleStanza = false;
+                if (event && event.attr('type') === 'connect.stateDigest?notify') {
+                    const digest = JSON.parse(event.getText());
+                    if (activityId === '-1' && digest.activityId === activityId && digest.activityStatus === 0) {
                         canHandleStanza = true;
                     }
-                    else if (activityId !== "-1" && digest.activityId === activityId && digest.activityStatus === 2) {
+                    else if (activityId !== '-1' && digest.activityId === activityId && digest.activityStatus === 2) {
                         canHandleStanza = true;
                     }
                 }
@@ -130,8 +131,8 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     turnOff() {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("turn off");
-            return this.startActivity("-1");
+            debug('turn off');
+            return this.startActivity('-1');
         });
     }
     /**
@@ -140,11 +141,11 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     isOff() {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("check if turned off");
+            debug('check if turned off');
             return this.getCurrentActivity()
-                .then(function (activityId) {
-                var off = (activityId === "-1");
-                debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
+                .then((activityId) => {
+                const off = (activityId === '-1');
+                debug(off ? 'system is currently off' : 'system is currently on with activity ' + activityId);
                 return off;
             });
         });
@@ -154,8 +155,8 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     getAvailableCommands() {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("retrieve available commands");
-            return this.request("config", undefined, "json")
+            debug('retrieve available commands');
+            return this.request('config', undefined, 'json')
                 .then((response) => {
                 return response;
             });
@@ -169,11 +170,11 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * @returns {Stanza}
      */
     buildCommandIqStanza(command, body) {
-        debug("buildCommandIqStanza for command '" + command + "' with body " + body);
-        return util_1.default.buildIqStanza("get", "connect.logitech.com", "vnd.logitech.harmony/vnd.logitech.harmony.engine?" + command, body);
+        debug(`buildCommandIqStanza for command '${command}' with body ${body}`);
+        return util_1.default.buildIqStanza('get', 'connect.logitech.com', 'vnd.logitech.harmony/vnd.logitech.harmony.engine?' + command, body);
     }
     defaultCanHandleStanzaPredicate(awaitedId, stanza) {
-        var stanzaId = stanza.attr("id");
+        const stanzaId = stanza.attr('id');
         return (stanzaId && stanzaId.toString() === awaitedId.toString());
     }
     /**
@@ -193,23 +194,21 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * @param canHandleStanzaPredicate
      */
     request(command, body, expectedResponseType, canHandleStanzaPredicate) {
-        debug("request with command '" + command + "' with body " + body);
-        var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
-            const iq = this.buildCommandIqStanza(command, body), id = iq.attr("id");
-            expectedResponseType = expectedResponseType || "encoded";
-            canHandleStanzaPredicate = canHandleStanzaPredicate || (stanza => this.defaultCanHandleStanzaPredicate(id, stanza));
-            resolveCallback = resolve;
-            rejectCallback = reject;
+        debug(`request with command '${command}' with body ${body}`);
+        return new Promise((resolveCallback, rejectCallback) => {
+            const iq = this.buildCommandIqStanza(command, body), id = iq.attr('id');
+            expectedResponseType = expectedResponseType || 'encoded';
+            canHandleStanzaPredicate =
+                canHandleStanzaPredicate || ((stanza) => this.defaultCanHandleStanzaPredicate(id, stanza));
+            this.responseHandlerQueue.push({
+                canHandleStanza: canHandleStanzaPredicate,
+                resolveCallback,
+                rejectCallback,
+                responseType: expectedResponseType
+            });
             // setImmediate
-            this._xmppClient.send(iq);
+            this.xmppClient.send(iq);
         });
-        this._responseHandlerQueue.push({
-            canHandleStanza: canHandleStanzaPredicate,
-            resolveCallback,
-            rejectCallback,
-            responseType: expectedResponseType
-        });
-        return prom;
     }
     /**
      * Sends a command with given body to the hub. The returned promise gets resolved
@@ -217,18 +216,19 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      */
     send(action, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            debug("send command '" + action + "' with body " + body);
-            var simpleAcknowledge = stanza => {
-                return stanza.getChild("oa") === undefined;
+            debug(`send command '${action}' with body ${body}`);
+            const simpleAcknowledge = (stanza) => {
+                return stanza.getChild('oa') === undefined;
             };
-            if (typeof body == "string") {
+            if (typeof body === 'string') {
                 return this.request(action, body, undefined, simpleAcknowledge);
             }
             else if (body && body.command && body.deviceId) {
                 return this.request(action, `{"command"::"${body.command}","type"::"${body.type || 'IRCommand'}","deviceId"::"${body.deviceId}"}`, undefined, simpleAcknowledge);
             }
             else {
-                return Promise.reject("With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}");
+                return Promise.reject('With the send command you need to provide a body parameter which can be ' +
+                    'a string or {command: string, deviceId: string, type?:string}');
             }
         });
     }
@@ -237,8 +237,8 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * to communicate again with the hub.
      */
     end() {
-        debug("close harmony client");
-        this._xmppClient.end();
+        debug('close harmony client');
+        this.xmppClient.end();
     }
 };
 HarmonyClient = HarmonyClient_1 = __decorate([
@@ -270,9 +270,9 @@ exports.HarmonyClient = HarmonyClient;
     class ControlGroup {
     }
     HarmonyClient.ControlGroup = ControlGroup;
-    class Function {
+    class FunctionObj {
     }
-    HarmonyClient.Function = Function;
+    HarmonyClient.FunctionObj = FunctionObj;
     class StateDigest {
     }
     HarmonyClient.StateDigest = StateDigest;

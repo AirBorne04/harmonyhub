@@ -1,8 +1,8 @@
 /// <reference types="node" />
-import { EventEmitter } from "events";
-import { Ping, PingOptions } from "./ping";
-import { ResponseCollector } from "./responseCollector";
-export interface HubData {
+import { EventEmitter } from 'events';
+import { Ping, PingOptions } from './ping';
+import { ResponseCollector } from './responseCollector';
+export interface IHubData {
     uuid: string;
     ip: string;
     friendlyName: string;
@@ -11,7 +11,7 @@ export interface HubData {
 }
 export declare class Explorer extends EventEmitter {
     port: number;
-    knownHubs: Map<string, HubData>;
+    knownHubs: Map<string, IHubData>;
     ping: Ping;
     responseCollector: ResponseCollector;
     cleanUpIntervalToken: NodeJS.Timer;
