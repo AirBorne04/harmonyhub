@@ -1,6 +1,6 @@
 {
   "name": "harmonyhub",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
   "dependencies": {
