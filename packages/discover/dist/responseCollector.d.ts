@@ -18,3 +18,8 @@ export declare class ResponseCollector extends EventEmitter {
      */
     stop(): void;
 }
+export declare namespace ResponseCollector {
+    enum Events {
+        RESPONSE = "response"
+    }
+}

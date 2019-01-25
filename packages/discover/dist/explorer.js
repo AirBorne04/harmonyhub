@@ -37,7 +37,7 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
      * If unspecified using any port available.
      * @param pingOptions Defines the broadcasting details for this explorer.
      */
-    constructor(incomingPort = 0, pingOptions) {
+    constructor(incomingPort = 5222, pingOptions) {
         super();
         this.knownHubs = new Map();
         this.port = incomingPort;
@@ -50,8 +50,8 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
     start() {
         debug('start()');
         this.responseCollector = new responseCollector_1.ResponseCollector(this.port);
-        this.responseCollector.on('response', this.handleResponse);
-        this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 5000);
+        this.responseCollector.on(responseCollector_1.ResponseCollector.Events.RESPONSE, this.handleResponse);
+        this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 7000);
         this.responseCollector.start();
         this.ping.start();
     }

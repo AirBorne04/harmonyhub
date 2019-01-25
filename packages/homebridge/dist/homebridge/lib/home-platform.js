@@ -92,7 +92,6 @@ let HomePlatform = class HomePlatform extends events_1.EventEmitter {
             }
             hub = new hub_1.Hub(this.log);
             this.hubMap.set(hubId, hub);
-            // this._hubIndex.push(hubId);
             return this._refreshHubAccessories(hubId, hub, false);
         });
         return Promise.all(accProm)

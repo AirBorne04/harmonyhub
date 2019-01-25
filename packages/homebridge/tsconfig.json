@@ -4,12 +4,15 @@
     "target": "es6",
     "lib": ["es6", "dom"],
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
     "experimentalDecorators": true,
+    "rootDir": "../",
     "paths": {
       "@harmonyhub/*": ["../*"]
-    }
+    },
+    "noResolve": true
   },
   "include": [
     "lib/**/*"
@@ -17,7 +20,6 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
-    "./dist/**/*",
-    "../client-ws"
+    "./dist/**/*"
   ]
 }

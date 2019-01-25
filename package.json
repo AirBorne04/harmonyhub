@@ -4,6 +4,9 @@
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
   "dependencies": {
+    "@harmonyhub/client": "file:packages/client",
+    "@harmonyhub/client-ws": "file:packages/client-ws",
+    "@harmonyhub/discover": "file:packages/discover",
     "@xmpp/client": "^0.3.0"
   },
   "devDependencies": {

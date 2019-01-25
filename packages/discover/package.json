@@ -1,6 +1,6 @@
 {
   "name": "@harmonyhub/discover",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "AirBorne04, original authored by Manuel Alabor",
   "description": "Discover available Logitech Harmony Hubs in the current network.",
   "homepage": "https://github.com/AirBorne04/harmonyhub/tree/master/packages/discover",

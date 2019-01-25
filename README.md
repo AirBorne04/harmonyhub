@@ -1,5 +1,5 @@
 # harmonyhub
-`harmonyhub` is a Node.JS library which wants to consolidate functions around interaction with a Logitech Harmony Hub from various different libraries from the community (the original authors and repos can be found in the Readme of each of the contained packages). These libraries have in common the usage of typescript and utilize the debug package for easy debugging. Furthermore I am trying to keep dependencies up to date and have as little of them and the same across the different packages for a minimal footprint.
+`harmonyhub` is a Node.JS library which wants to consolidate functions around interaction with a Logitech Harmony Hub from various different libraries from the community (the original authors and repos can be found in the Readme of each of the contained packages). These libraries have in common the usage of typescript with tslint and utilize the debug package for easy debugging. Furthermore I am trying to keep dependencies up to date and have as little of them and the same across the different packages for a minimal footprint.
 The library contains the following packages:
 
 Package | Status

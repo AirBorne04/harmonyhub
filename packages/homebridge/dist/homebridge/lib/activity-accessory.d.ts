@@ -18,7 +18,7 @@ export declare class ActivityAccessory extends HubAccessoryBase {
     initConnection(): Promise<void>;
     updateConnection(connection: HubConnection): void;
     _updateActivities(list: any): void;
-    _updateActivityState(currentActivity?: any): void;
+    _updateActivityState(currentActivity?: string): void;
     refreshActivityAsync(): Promise<void | any>;
     _getActivityService(activity: any): any;
     _getActivityServices(): any;

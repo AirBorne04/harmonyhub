@@ -27,8 +27,8 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "@harmonyhub/client-ws": "^1.0.2",
-    "@harmonyhub/discover": "^1.0.6",
+    "@harmonyhub/client-ws": "^1.0.3",
+    "@harmonyhub/discover": "^1.0.7",
     "autobind-decorator": "^2.4.0",
     "debug": "^4.1.1",
     "lodash": "^4.17.11"

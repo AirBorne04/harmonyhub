@@ -35,7 +35,7 @@ function generateBroadcastIp() {
     }).map((ip) => {
         const nums = ip.split('.');
         nums[3] = 255;
-        debug('Fallback to local ip address -> ' + nums.join);
+        debug('Fallback to local ip address -> ' + nums.join('.'));
         return nums.join('.');
     });
 }
@@ -51,7 +51,7 @@ let Ping = class Ping {
         // default address is 255.255.255.255 from generateBroadcastIp()
         this.options = Object.assign({
             port: 5224,
-            interval: 1000
+            interval: 2000
         }, options);
         debug(`Ping(${portToAnnounce}, ${JSON.stringify(this.options)})`);
         this.portToAnnounce = portToAnnounce;

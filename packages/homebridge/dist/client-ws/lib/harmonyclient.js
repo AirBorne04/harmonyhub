@@ -26,19 +26,19 @@ const WebSocketAsPromised = require("websocket-as-promised");
  * Creates a new HarmonyClient using the given xmppClient to communication.
  */
 let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.EventEmitter {
-    connect(hubip) {
-        debug('connect to harmony hub');
-        return this._getRemoteId(hubip)
-            .then((response) => {
-            this.remoteId = response.body.data.remoteId;
-        })
-            .then(() => this._connect(hubip));
+    connect(hubip, remoteId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('connect to harmony hub');
+            // use the provided remoteId or get it from the hub
+            this.remoteId = remoteId || (yield this._getRemoteId(hubip)).body.data.removeId;
+            return this._connect(hubip);
+        });
     }
     _getRemoteId(hubip) {
         const payload = {
             url: 'http://' + hubip + ':8088',
             method: 'POST',
-            timeout: 5000,
+            timeout: 10000,
             headers: {
                 'Content-type': 'application/json',
                 'Accept': 'text/plain',
