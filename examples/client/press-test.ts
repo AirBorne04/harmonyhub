@@ -1,4 +1,4 @@
-import { getHarmonyClient } from '../../packages/client/dist';
+import { getHarmonyClient } from '@harmonyhub/client';
 
 async function prep() {
   const harmonyClient = await getHarmonyClient('192.168.0.31');
