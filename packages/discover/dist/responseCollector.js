@@ -6,12 +6,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var ResponseCollector_1;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
-var debug = logger("harmonyhub:discover:responsecollector");
+const debug = logger('harmonyhub:discover:responsecollector');
 const events_1 = require("events");
 const net = require("net");
-let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
+let ResponseCollector = ResponseCollector_1 = class ResponseCollector extends events_1.EventEmitter {
     /**
      * @param port Port number on this client to use for the tcp server.
      */
@@ -26,17 +27,17 @@ let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
      * response when the message is done.
      */
     start() {
-        debug("start()");
+        debug('start()');
         this.server = net.createServer((socket) => {
-            debug("handle new connection");
-            var buffer = "";
-            socket.on("data", (data) => {
-                debug("received data chunk");
+            debug('handle new connection');
+            let buffer = '';
+            socket.on('data', (data) => {
+                debug('received data chunk');
                 buffer += data.toString();
             });
-            socket.on("end", () => {
-                debug("connection closed. emitting data.");
-                this.emit("response", buffer);
+            socket.on('end', () => {
+                debug('connection closed. emitting data.');
+                this.emit(ResponseCollector_1.Events.RESPONSE, buffer);
             });
         }).listen(this.port);
     }
@@ -44,16 +45,23 @@ let ResponseCollector = class ResponseCollector extends events_1.EventEmitter {
      * Close the tcp server.
      */
     stop() {
-        debug("stop()");
+        debug('stop()');
         if (this.server) {
             this.server.close();
         }
         else {
-            debug("not running");
+            debug('not running');
         }
     }
 };
-ResponseCollector = __decorate([
+ResponseCollector = ResponseCollector_1 = __decorate([
     autobind_decorator_1.default
 ], ResponseCollector);
+exports.ResponseCollector = ResponseCollector;
+(function (ResponseCollector) {
+    let Events;
+    (function (Events) {
+        Events["RESPONSE"] = "response";
+    })(Events = ResponseCollector.Events || (ResponseCollector.Events = {}));
+})(ResponseCollector = exports.ResponseCollector || (exports.ResponseCollector = {}));
 exports.ResponseCollector = ResponseCollector;

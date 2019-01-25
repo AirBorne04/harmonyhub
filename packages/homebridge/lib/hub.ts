@@ -1,14 +1,13 @@
-import * as _ from "lodash";
-import { HubConnection } from "./hub-connection";
-import { ActivityAccessory } from "./activity-accessory";
-
+import * as _ from 'lodash';
+import { ActivityAccessory } from './activity-accessory';
+import { HubConnection } from './hub-connection';
 
 export class Hub {
 
   connection: HubConnection;
   log: any;
 
-  _accessories: any;
+  accessories: Array<ActivityAccessory>;
 
   constructor(log, connection?: HubConnection) {
     this.connection = connection;
@@ -17,7 +16,7 @@ export class Hub {
 
   updateConnection(connection) {
     this.connection = connection;
-    _.forEach(this._accessories, function(acc){
+    _.forEach(this.accessories, (acc) => {
       if (acc.updateConnection) {
         acc.updateConnection(connection);
       }
@@ -25,31 +24,28 @@ export class Hub {
   }
 
   getAccessoriesAsync() {
-    if (this._accessories) {
-      return Promise.resolve(this._accessories);
+    if (this.accessories) {
+      return Promise.resolve(this.accessories);
     }
-    return this.updateAccessoriesAsync();
+    return this.updateAccessories();
   }
 
-  updateAccessoriesAsync(cachedAccessories?) {
-    var self = this;
-    var conn = this.connection;
+  async updateAccessories(cachedAccessories?) {
+    // var self = this;
+    const conn = this.connection;
 
-    var activityCachedAcc = _.find(cachedAccessories, function (acc) {
-      return acc.context.typeKey = ActivityAccessory.typeKey;
-    });
-    var activityAcc = _.find(this._accessories, function (a) { return a instanceof ActivityAccessory; });
+    const activityCachedAcc = _.find(cachedAccessories, (acc) => acc.context.typeKey = ActivityAccessory.typeKey);
+
+    let activityAcc: ActivityAccessory = _.filter(this.accessories, (a: any) => (a instanceof ActivityAccessory))
+                                          .map((a: ActivityAccessory) => a as ActivityAccessory);
+
     if (!activityAcc) {
       activityAcc = new ActivityAccessory(activityCachedAcc, this.log, conn);
     }
-    var activityTask = activityAcc.initAsync().return(activityAcc);
 
-    return Promise.all([
-        activityTask
-      ])
-      .then(function(accessories){
-        self._accessories = accessories;
-        return accessories;
-      });
+    await activityAcc.initConnection();
+    this.accessories = [activityAcc];
+
+    return this.accessories;
   }
 }

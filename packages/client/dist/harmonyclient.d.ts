@@ -1,19 +1,19 @@
 /// <reference types="node" />
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 /**
- * Creates a new HarmonyClient using the given xmppClient to communication.
+ * Creates a new HarmonyClient using the given xmppClient to communicate.
  * @param xmppClient
  */
 export declare class HarmonyClient extends EventEmitter {
-    private _xmppClient;
-    private _responseHandlerQueue;
+    private xmppClient;
+    private responseHandlerQueue;
     constructor(xmppClient: any);
     private handleStanza;
     /**
      * The state digest is caused by the hub to let clients know about remote updates
      * @param {message} stateDigest
      */
-    onStateDigest(stateDigest: any): void;
+    private onStateDigest;
     /**
      * Returns the latest turned on activity from a hub.
      *
@@ -23,7 +23,7 @@ export declare class HarmonyClient extends EventEmitter {
     /**
      * Retrieves a list with all available activities.
      */
-    getActivities(): Promise<HarmonyClient.ActivityDescription[]>;
+    getActivities(): Promise<Array<HarmonyClient.ActivityDescription>>;
     /**
      * Starts an activity with the given id.
      */
@@ -84,7 +84,9 @@ export declare class HarmonyClient extends EventEmitter {
 }
 export declare namespace HarmonyClient {
     enum Events {
-        STATE_DIGEST = "stateDigest"
+        STATE_DIGEST = "stateDigest",
+        CONNECTED = "open",
+        DISCONNECTED = "close"
     }
     class ConfigDescription {
         activity: Array<ActivityDescription>;
@@ -148,9 +150,9 @@ export declare namespace HarmonyClient {
     }
     class ControlGroup {
         name: string;
-        function: Array<Function>;
+        function: Array<FunctionObj>;
     }
-    class Function {
+    class FunctionObj {
         action: string;
         name: string;
         label: string;
@@ -158,12 +160,39 @@ export declare namespace HarmonyClient {
     class StateDigest {
         activityId: string;
         activityStatus: StateDigestStatus;
+        sleepTimerId: number;
+        runningZoneList: Array<{}>;
+        contentVersion: number;
+        errorCode: ERROR_CODE;
+        syncStatus: number;
+        time: number;
+        stateVersion: number;
+        tzoffset: string;
+        tzOffset: string;
+        mode: number;
+        hubSwVersion: string;
+        deviceSetupState: Array<{}>;
+        isSetupComplete: boolean;
+        configVersion: number;
+        sequence: boolean;
+        discoveryServer: string;
+        discoveryServerCF: string;
+        updates: any;
+        wifiStatus: number;
+        tz: string;
+        activitySetupState: boolean;
+        runningActivityList: string;
+        hubUpdate: boolean;
+        accountId: string;
     }
     enum StateDigestStatus {
         HUB_IS_OFF = 0,
         ACTIVITY_STARTING = 1,
         ACTIVITY_STARTED = 2,
         HUB_TURNING_OFF = 3
+    }
+    enum ERROR_CODE {
+        OK = "200"
     }
 }
 export default HarmonyClient;

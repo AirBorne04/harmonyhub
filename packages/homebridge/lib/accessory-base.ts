@@ -2,17 +2,17 @@
  * Base class for all accessories in this plugin
  */
 
-var Accessory, Service, Characteristic, uuid;
+let Accessory, Service, Characteristic, uuid;
 
 export function AccessoryBaseInit(exportedTypes) {
-	if (exportedTypes && !Accessory) {
-		Accessory = exportedTypes.PlatformAccessory || exportedTypes.Accessory;
-		Service = exportedTypes.Service;
-		Characteristic = exportedTypes.Characteristic;
-		uuid = exportedTypes.uuid;
-	}
-	return AccessoryBase;
-};
+  if (exportedTypes && !Accessory) {
+    Accessory = exportedTypes.PlatformAccessory || exportedTypes.Accessory;
+    Service = exportedTypes.Service;
+    Characteristic = exportedTypes.Characteristic;
+    uuid = exportedTypes.uuid;
+  }
+  return AccessoryBase;
+}
 
 export class AccessoryBase {
 
@@ -23,7 +23,7 @@ export class AccessoryBase {
     this.log = log;
 
     if (!accessory) {
-      var id = uuid.generate(idKey);
+      const id = uuid.generate(idKey);
       accessory = new Accessory(name, id);
       accessory.name = name;
       accessory.uuid_base = id;
@@ -34,16 +34,16 @@ export class AccessoryBase {
     this.accessory = accessory;
 
     this.accessory.getService(Service.AccessoryInformation)
-      .setCharacteristic(Characteristic.Manufacturer, "Logitech")
-      .setCharacteristic(Characteristic.Model, "Harmony");
+      .setCharacteristic(Characteristic.Manufacturer, 'Logitech')
+      .setCharacteristic(Characteristic.Model, 'Harmony');
   }
 
   getService(info: any) {
     this.accessory.getService(info);
   }
-  
+
 }
 
-var getServices = function() {
+const getServices = function() {
   return this.services;
 };

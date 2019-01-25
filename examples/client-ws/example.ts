@@ -1,7 +1,7 @@
-import { getHarmonyClient } from "../../packages/client-ws/dist";
+import { getHarmonyClient } from '@harmonyhub/client-ws';
 
 async function run(): Promise<void> {
-  const harmonyClient = await getHarmonyClient("192.168.0.30");
+  const harmonyClient = await getHarmonyClient('192.168.0.30');
 
   // const encodedAction = `{"command"::"VolumeUp","type"::"IRCommand","deviceId"::"27633596"}`;
   // const dt_press = `action=${encodedAction}:status=press`;
@@ -11,10 +11,10 @@ async function run(): Promise<void> {
     const commands = await harmonyClient.getAvailableCommands(),
           device = commands.device[0],
           powerControls = device.controlGroup
-            .filter(function (group) { return group.name.toLowerCase() === 'volume' })
+            .filter((group) => group.name.toLowerCase() === 'volume')
             .pop(),
-          powerOnFunction = powerControls['function']
-            .filter(function (action) { return action.name.toLowerCase() === 'volumeup' })
+          powerOnFunction = powerControls.function
+            .filter((action) => action.name.toLowerCase() === 'volumeup')
             .pop();
 
     if (powerOnFunction) {
@@ -31,16 +31,16 @@ async function run(): Promise<void> {
     // )
 
     // harmonyClient.turnOff();
-    
+
   //   await harmonyClient.send('holdAction', dt_press);
   //   await harmonyClient.send('holdAction', dt_release);
-    
+
     harmonyClient.end();
-  } catch(error) {
+  } catch (error) {
     console.error('Error', error.message);
   }
 }
 
 run().catch(
-  err => console.log(err)
+  (err) => console.log(err)
 );

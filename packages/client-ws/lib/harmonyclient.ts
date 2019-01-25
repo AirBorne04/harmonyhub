@@ -1,14 +1,13 @@
-import autobind from "autobind-decorator";
-import * as logger from "debug";
+import autobind from 'autobind-decorator';
+import * as logger from 'debug';
+import * as got from 'got';
 
-var debug = logger("harmonyhub:client-ws:harmonyclient");
+const debug = logger('harmonyhub:client-ws:harmonyclient');
 
-// import { default as xmppUtil } from "./util";
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 
-import { w3cwebsocket as WebSocketClient } from "websocket";
-import WebSocketAsPromised = require("websocket-as-promised");
-import * as got from "got";
+import { w3cwebsocket as WebSocketClient } from 'websocket';
+import WebSocketAsPromised = require('websocket-as-promised');
 
 /**
  * Creates a new HarmonyClient using the given xmppClient to communication.
@@ -16,18 +15,15 @@ import * as got from "got";
 @autobind
 export class HarmonyClient extends EventEmitter {
 
-  private _wsClient: WebSocketAsPromised;
-  private _remoteId: string;
-  private _interval: NodeJS.Timer;
+  private wsClient: WebSocketAsPromised;
+  private remoteId: string;
+  private heartbeatInterval: NodeJS.Timer;
 
-  public connect(hubip: string) {
-    debug("connect to harmony hub");
-
-    return this._getRemoteId(hubip)
-      .then(response => {
-        this._remoteId = response.body.data.remoteId;
-      })
-      .then(() => this._connect(hubip))
+  public async connect(hubip: string, remoteId?: string) {
+    debug('connect to harmony hub');
+    // use the provided remoteId or get it from the hub
+    this.remoteId = remoteId || (await this._getRemoteId(hubip)).body.data.removeId;
+    return this._connect(hubip);
   }
 
   private _getRemoteId(hubip: string) {
@@ -35,11 +31,11 @@ export class HarmonyClient extends EventEmitter {
     const payload = {
       url: 'http://' + hubip + ':8088',
       method: 'POST',
-      timeout: 5000,
+      timeout: 10000,
       headers: {
         'Content-type': 'application/json',
-        Accept: 'text/plain',
-        Origin: 'http//:localhost.nebula.myharmony.com'
+        'Accept': 'text/plain',
+        'Origin': 'http//:localhost.nebula.myharmony.com'
       },
       json: true,
       body: {
@@ -53,12 +49,12 @@ export class HarmonyClient extends EventEmitter {
   }
 
   private async _connect(hubip: string) {
-    const url = 'ws://' + hubip + ':8088/?domain=svcs.myharmony.com&hubId=' + this._remoteId;
+    const url = `ws://${hubip}:8088/?domain=svcs.myharmony.com&hubId=${this.remoteId}`;
 
-    debug("connecting to " + url);
+    debug(`connecting to ${url}`);
 
-    this._wsClient = new WebSocketAsPromised(url, {
-      createWebSocket: (url: string) => new WebSocketClient(url),
+    this.wsClient = new WebSocketAsPromised(url, {
+      createWebSocket: (urlString: string) => new WebSocketClient(urlString),
       packMessage: (data: any) => JSON.stringify(data),
       unpackMessage: (message: string) => JSON.parse(message),
       attachRequestId: (data: any, requestId: string) => {
@@ -68,13 +64,13 @@ export class HarmonyClient extends EventEmitter {
       extractRequestId: (data: any) => data && data.id
     });
 
-    this._wsClient.onClose.addListener(() => {
-      clearInterval(this._interval);
-      this.emit('close');
+    this.wsClient.onClose.addListener(() => {
+      clearInterval(this.heartbeatInterval);
+      this.emit(HarmonyClient.Events.DISCONNECTED);
     });
 
     const payload = {
-      hubId: this._remoteId,
+      hubId: this.remoteId,
       timeout: 30,
       hbus: {
         cmd: 'vnd.logitech.connect/vnd.logitech.statedigest?get',
@@ -86,11 +82,11 @@ export class HarmonyClient extends EventEmitter {
       }
     };
 
-    return this._wsClient.open()
-      .then(() => this._interval = setInterval(() => this._wsClient.send(''), 55000))
-      .then(() => this._wsClient.onUnpackedMessage.addListener(this._onMessage))
-      .then(() => this._wsClient.sendPacked(payload))
-      .then(() => this.emit('open'));
+    return this.wsClient.open()
+      .then(() => this.heartbeatInterval = setInterval(() => this.wsClient.send(''), 55000))
+      .then(() => this.wsClient.onUnpackedMessage.addListener(this._onMessage))
+      .then(() => this.wsClient.sendPacked(payload))
+      .then(() => this.emit(HarmonyClient.Events.CONNECTED));
   }
 
   _onMessage(message) {
@@ -101,10 +97,10 @@ export class HarmonyClient extends EventEmitter {
 
   /**
    * The state digest is caused by the hub to let clients know about remote updates
-   * @param {message} stateDigest 
+   * @param {message} stateDigest
    */
   private onStateDigest(stateDigest) {
-    debug("received state digest ", JSON.stringify(stateDigest) );
+    debug(`received state digest ${JSON.stringify(stateDigest)}`);
     this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }
 
@@ -114,10 +110,10 @@ export class HarmonyClient extends EventEmitter {
    * @returns Promise<string>
    */
   public getCurrentActivity(): Promise<string> {
-    debug("retrieve current activity");
-    
+    debug('retrieve current activity');
+
     const payload = {
-      hubId: this._remoteId,
+      hubId: this.remoteId,
       timeout: 30,
       hbus: {
         cmd: 'vnd.logitech.harmony/vnd.logitech.harmony.engine?getCurrentActivity',
@@ -128,9 +124,9 @@ export class HarmonyClient extends EventEmitter {
         }
       }
     };
-  
-    return this._wsClient.sendRequest(payload)
-      .then(response => {
+
+    return this.wsClient.sendRequest(payload)
+      .then((response) => {
         return response.data.result;
       });
   }
@@ -138,13 +134,11 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Retrieves a list with all available activities.
    */
-  getActivities(): Promise<HarmonyClient.ActivityDescription[]> {
-    debug("retrieve activities")
+  public async getActivities(): Promise<Array<HarmonyClient.ActivityDescription>> {
+    debug('retrieve activities');
 
-    return this.getAvailableCommands()
-      .then(function (availableCommands: HarmonyClient.ConfigDescription) {
-        return availableCommands.activity;
-      });
+    const availableCommands = await this.getAvailableCommands();
+    return availableCommands.activity;
   }
 
   /**
@@ -152,7 +146,7 @@ export class HarmonyClient extends EventEmitter {
    */
   public startActivity(activityId): Promise<{}> {
     const payload = {
-      hubId: this._remoteId,
+      hubId: this.remoteId,
       timeout: 30,
       hbus: {
         cmd: 'harmony.activityengine?runactivity',
@@ -163,20 +157,20 @@ export class HarmonyClient extends EventEmitter {
           args: {
             rule: 'start'
           },
-          activityId: activityId
+          activityId
         }
       }
     };
 
-    return this._wsClient.sendRequest(payload);
+    return this.wsClient.sendRequest(payload);
   }
 
   /**
    * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
    */
   public turnOff(): Promise<{}> {
-    debug("turn off");
-    return this.startActivity("-1");
+    debug('turn off');
+    return this.startActivity('-1');
   }
 
   /**
@@ -184,25 +178,23 @@ export class HarmonyClient extends EventEmitter {
    * activities id is equal to -1, no activity is on currently.
    */
   public async isOff(): Promise<boolean> {
-    debug("check if turned off");
+    debug('check if turned off');
 
-    return this.getCurrentActivity()
-      .then(function (activityId) {
-        const off = (activityId === "-1");
-        debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
+    const activityId = await this.getCurrentActivity(),
+          off = (activityId === '-1');
 
-        return off;
-      });
+    debug(off ? 'system is currently off' : 'system is currently on with activity ' + activityId);
+    return off;
   }
 
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
    */
   public getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
-    debug("retrieve available commands");
+    debug('retrieve available commands');
 
     const payload = {
-      hubId: this._remoteId,
+      hubId: this.remoteId,
       timeout: 30,
       hbus: {
         cmd: 'vnd.logitech.harmony/vnd.logitech.harmony.engine?config',
@@ -214,7 +206,7 @@ export class HarmonyClient extends EventEmitter {
       }
     };
 
-    return this._wsClient.sendRequest(payload)
+    return this.wsClient.sendRequest(payload)
       .then((resp: any) => {
         return resp.data as HarmonyClient.ConfigDescription;
       });
@@ -224,26 +216,28 @@ export class HarmonyClient extends EventEmitter {
    * sends a command to the hub, including the press action and the release after the command_timeframe
    * @param action action name usually 'holdAction'
    * @param body
-   * @param command_timeframe the time when to send a release message
+   * @param commandTimeframe the time when to send a release message
    */
-  public async send(action: string, body: string | {command: string, deviceId: string, type?:string}, command_timeframe = 0): Promise<{}> {
+  public async send(action: string, body: string | {command: string, deviceId: string, type?: string},
+                    commandTimeframe = 0): Promise<{}> {
     let encodedAction;
     if (typeof body === 'string') {
       encodedAction = body;
     }
     else if (body && body.command && body.deviceId) {
       debug(`Sending command ${body.command} to device ${body.deviceId} with delay`);
-      encodedAction = `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`
+      encodedAction =
+        `{"command": "${body.command}", "type": "${body.deviceId || 'IRCommand'}", "deviceId": "${body.deviceId}"}`;
     }
     else {
       return Promise.reject(
-        "With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}"
+        'With the send command you need to provide a body parameter which ' +
+        'can be a string or {command: string, deviceId: string, type?: string}'
       );
     }
-    
-    
+
     const payloadPress = {
-      hubId: this._remoteId,
+      hubId: this.remoteId,
       timeout: 30,
       hbus: {
         cmd: `harmony.engine?${action}`,
@@ -251,7 +245,6 @@ export class HarmonyClient extends EventEmitter {
         params: {
           async: 'true',
           timestamp: 0,
-          
           status: 'press',
           verb: 'render',
           action: encodedAction
@@ -263,42 +256,44 @@ export class HarmonyClient extends EventEmitter {
         ...payloadPress.hbus,
         params: {
           ...payloadPress.hbus.params,
+          timestamp: commandTimeframe,
           status: 'release'
         }
       }
     };
 
-    this._wsClient.sendPacked(payloadPress);
-    
+    this.wsClient.sendPacked(payloadPress);
+
     return new Promise((resolve, reject) => {
-      if (command_timeframe > 0) {
+      if (commandTimeframe > 0) {
         setTimeout(
           () => {
-            this._wsClient.sendPacked(payloadRelease);
+            this.wsClient.sendPacked(payloadRelease);
             resolve();
-          }, command_timeframe);
+          }, commandTimeframe);
       }
       else {
-        this._wsClient.sendPacked(payloadRelease);
+        this.wsClient.sendPacked(payloadRelease);
         resolve();
       }
     });
   }
-    
 
   /**
    * Closes the connection the the hub. You have to create a new client if you would like
    * to communicate again with the hub.
    */
   public end() {
-    debug("close harmony client");
-    this._wsClient.close();
+    debug('close harmony client');
+    this.wsClient.close();
   }
 }
 
 export namespace HarmonyClient {
   export enum Events {
-    STATE_DIGEST = "stateDigest"
+    STATE_DIGEST = 'stateDigest',
+    CONNECTED = 'open',
+    DISCONNECTED = 'close'
   }
 
   export class ConfigDescription {
@@ -359,6 +354,7 @@ export namespace HarmonyClient {
   }
 
   export class PowerAction {
+    // tslint:disable-next-line:variable-name
     __type: string;
     IRCommandName: string;
     Order: number;
@@ -368,10 +364,10 @@ export namespace HarmonyClient {
 
   export class ControlGroup {
     name: string;
-    function: Array<Function>;
+    function: Array<FunctionObj>;
   }
 
-  export class Function {
+  export class FunctionObj {
     action: string;
     name: string;
     label: string;
@@ -380,6 +376,31 @@ export namespace HarmonyClient {
   export class StateDigest {
     activityId: string;
     activityStatus: StateDigestStatus;
+
+    sleepTimerId: number;
+    runningZoneList: Array<{}>;
+    contentVersion: number;
+    errorCode: ERROR_CODE;
+    syncStatus: number;
+    time: number;
+    stateVersion: number;
+    tzoffset: string;
+    tzOffset: string;
+    mode: number;
+    hubSwVersion: string;
+    deviceSetupState: Array<{}>;
+    isSetupComplete: boolean;
+    configVersion: number;
+    sequence: boolean;
+    discoveryServer: string;
+    discoveryServerCF: string;
+    updates: any;
+    wifiStatus: number;
+    tz: string;
+    activitySetupState: boolean;
+    runningActivityList: string;
+    hubUpdate: boolean;
+    accountId: string;
   }
 
   export enum StateDigestStatus {
@@ -387,6 +408,10 @@ export namespace HarmonyClient {
     ACTIVITY_STARTING = 1,
     ACTIVITY_STARTED = 2,
     HUB_TURNING_OFF = 3
+  }
+
+  export enum ERROR_CODE {
+    OK = '200'
   }
 }
 

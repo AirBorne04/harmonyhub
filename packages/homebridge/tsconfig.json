@@ -1,11 +1,18 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "es6",
-    "lib": ["es6"],
+    "lib": ["es6", "dom"],
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "rootDir": "../",
+    "paths": {
+      "@harmonyhub/*": ["../*"]
+    },
+    "noResolve": true
   },
   "include": [
     "lib/**/*"

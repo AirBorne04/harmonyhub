@@ -11,11 +11,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const harmonyclient_1 = require("./harmonyclient");
 var harmonyclient_2 = require("./harmonyclient");
 exports.HarmonyClient = harmonyclient_2.HarmonyClient;
-function getHarmonyClient(hubhost, hubport) {
+function getHarmonyClient(hubhost, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        // make new harmony hub client
+        // map a pure number to the options object
+        if (typeof options === 'number') {
+            options = {
+                port: options
+            };
+        }
+        // create the client based on options, the websocket client does not need a port
         const harmonyClient = new harmonyclient_1.HarmonyClient();
-        yield harmonyClient.connect(hubhost);
+        yield harmonyClient.connect(hubhost, options.remoteId);
         return harmonyClient;
     });
 }

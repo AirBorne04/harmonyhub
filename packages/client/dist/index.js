@@ -10,9 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const login_1 = require("./login");
 const harmonyclient_1 = require("./harmonyclient");
-function getHarmonyClient(hubhost, hubport) {
+var harmonyclient_2 = require("./harmonyclient");
+exports.HarmonyClient = harmonyclient_2.HarmonyClient;
+function getHarmonyClient(hubhost, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        var xmppClient = yield login_1.login(hubhost, hubport);
+        // map a pure number to the options object
+        if (typeof options === 'number') {
+            options = {
+                port: options
+            };
+        }
+        // the xmpp client does not require a remoteId?
+        const xmppClient = yield login_1.login(hubhost, options.port);
         return new harmonyclient_1.HarmonyClient(xmppClient);
     });
 }

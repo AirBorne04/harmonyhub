@@ -27,42 +27,10 @@ Enhancements over the harmonyhubjs-client package are the following
 
 The following examples are available in the example [folder](/examples/client-ws) and are written in modern javascript with async/await utilization.
 
-* [toggleTvActivity](/examples/client-ws/toggleTvActivity.ts) - toggles 'Watch TV' activity and off (same as below)
+* [discover-connect](/examples/client-ws/discover-connect.ts) - discover and and connect to hubs on the network
+* [toggleTvActivity](/examples/client-ws/toggleTvActivity.ts) - toggles 'Watch TV' activity and off
 * [printFunctions](/examples/client-ws/printFunctions.ts) - prints out all available devices and their names together with all commands availbale for a 'Television' device
 * [stateDigest](/examples/client-ws/stateDigest.ts) - shows how to listen on stateDigest events from the hub
-
-This example connects to a Harmony hub available on the IP `192.168.0.30`. As soon as the the connection is established, `isOff()` checks if the equipment is turned off. If off, the activity with the name `Watch TV` is started. If on, all devices are turned off.
-
-```javascript
-import { getHarmonyClient } from '@harmonyhub/client-ws';
-
-async function run() {
-  const harmony = await getHarmonyClient('192.168.0.30'),
-        isOff = await harmony.isOff();
-  
-  if (isOff) {
-    console.log('Currently off. Turning TV on.');
-
-    const activities = await harmony.getActivities(),
-      activity = activities[0];
-    
-    if (activity) {
-      await harmony.startActivity(activity.id);
-    }
-  }
-  else {
-    console.log('Currently on. Turning TV off');
-    await harmony.turnOff();
-  }
-
-  // diconnect
-  harmony.end();
-}
-
-run().catch(
-  err => console.log(err)
-);
-```
 
 ## Debug Traces
 `@harmonyhub/client-ws` uses [debug](https://github.com/visionmedia/debug) for generating traces throughout its execution time. Activate them by setting the `DEBUG` environment variable:

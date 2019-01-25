@@ -1,17 +1,44 @@
 /// <reference types="node" />
-import { EventEmitter } from "events";
-import { Ping, PingOptions } from "./ping";
-import { ResponseCollector } from "./responseCollector";
-export interface HubData {
+import { EventEmitter } from 'events';
+import { Ping, PingOptions } from './ping';
+import { ResponseCollector } from './responseCollector';
+export interface IHubData {
     uuid: string;
     ip: string;
     friendlyName: string;
-    fullHubInfo: any;
+    fullHubInfo: IFullHubInfo;
     lastSeen: number;
+}
+export interface IFullHubInfo {
+    email: string;
+    mode: string;
+    accountId: string;
+    ip: string;
+    port: string;
+    uuid: string;
+    hubId: string;
+    current_fw_version: string;
+    productId: string;
+    setupSessionType: string;
+    setupSessionClient: string;
+    setupSessionIsStale: string;
+    setupSessionSetupType: string;
+    setupStatus: string;
+    host_name: string;
+    friendlyName: string;
+    discoveryServerUri: string;
+    discoveryServerUriCF: string;
+    openApiVersion: string;
+    minimumOpenApiClientVersionRequired: string;
+    recommendedOpenApiClientVersion: string;
+    protocolVersion: string;
+    hubProfiles: string;
+    remoteId: string;
+    oohEnabled: string;
 }
 export declare class Explorer extends EventEmitter {
     port: number;
-    knownHubs: Map<string, HubData>;
+    knownHubs: Map<string, IHubData>;
     ping: Ping;
     responseCollector: ResponseCollector;
     cleanUpIntervalToken: NodeJS.Timer;

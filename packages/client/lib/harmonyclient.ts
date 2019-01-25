@@ -1,61 +1,65 @@
-import autobind from "autobind-decorator";
-import * as logger from "debug";
+import autobind from 'autobind-decorator';
+import * as logger from 'debug';
 
-var debug = logger("harmonyhub:client:harmonyclient");
+const debug = logger('harmonyhub:client:harmonyclient');
 
-import { default as xmppUtil } from "./util";
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
+import { default as xmppUtil } from './util';
 
 /**
- * Creates a new HarmonyClient using the given xmppClient to communication.
+ * Creates a new HarmonyClient using the given xmppClient to communicate.
  * @param xmppClient
  */
 @autobind
 export class HarmonyClient extends EventEmitter {
 
-  private _xmppClient: any;
-  private _responseHandlerQueue: Array<any>;
-  
+  private xmppClient: any;
+  private responseHandlerQueue: Array<any>;
+
   constructor(xmppClient) {
     super();
 
-    debug("create new harmony client");
+    debug('create new harmony client');
 
-    this._xmppClient = xmppClient;
-    this._responseHandlerQueue = [];
+    this.xmppClient = xmppClient;
+    this.responseHandlerQueue = [];
 
-    xmppClient.on("stanza", this.handleStanza);
-    xmppClient.on("error", function (error) {
-      debug("XMPP Error: " + error.message);
+    this.emit(HarmonyClient.Events.CONNECTED);
+
+    xmppClient.on('stanza', this.handleStanza);
+    xmppClient.on('close', this.emit(HarmonyClient.Events.DISCONNECTED));
+    xmppClient.on('error', (error) => {
+      debug('XMPP Error: ' + error.message);
     });
   }
 
   private handleStanza(stanza) {
-    debug("handleStanza(" + stanza.toString() + ")");
+    debug('handleStanza(' + stanza.toString() + ')');
 
     // Check for state digest:
-    var event = stanza.getChild("event");
-    if (event && event.attr("type") === "connect.stateDigest?notify") {
+    const event = stanza.getChild('event');
+    if (event && event.attr('type') === 'connect.stateDigest?notify') {
       this.onStateDigest(JSON.parse(event.getText()));
     }
 
     // Check for queued response handlers:
-    this._responseHandlerQueue.forEach(function (responseHandler, index, array) {
+    this.responseHandlerQueue.forEach((responseHandler, index, array) => {
       if (responseHandler.canHandleStanza(stanza)) {
-        debug("received response stanza for queued response handler");
+        debug('received response stanza for queued response handler');
 
-        var response = stanza.getChildText("oa"),
-            oa = stanza.getChild("oa"),
-            decodedResponse;
+        const response = stanza.getChildText('oa'),
+              oa = stanza.getChild('oa');
 
-        if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode != 200) {
+        let decodedResponse;
+
+        if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode !== 200) {
           responseHandler.rejectCallback({
             code: oa.attrs.errorcode,
             message: oa.attrs.errorstring
           });
         }
         else {
-          if (responseHandler.responseType === "json") {
+          if (responseHandler.responseType === 'json') {
             decodedResponse = JSON.parse(response);
           } else {
             decodedResponse = xmppUtil.decodeColonSeparatedResponse(response);
@@ -70,10 +74,10 @@ export class HarmonyClient extends EventEmitter {
 
   /**
    * The state digest is caused by the hub to let clients know about remote updates
-   * @param {message} stateDigest 
+   * @param {message} stateDigest
    */
-  onStateDigest(stateDigest) {
-    debug("received state digest");
+  private onStateDigest(stateDigest: HarmonyClient.StateDigest) {
+    debug('received state digest');
     this.emit(HarmonyClient.Events.STATE_DIGEST, stateDigest);
   }
 
@@ -82,11 +86,11 @@ export class HarmonyClient extends EventEmitter {
    *
    * @returns Promise<string>
    */
-  getCurrentActivity(): Promise<string> {
-    debug("retrieve current activity");
+  public async getCurrentActivity(): Promise<string> {
+    debug('retrieve current activity');
 
-    return this.request("getCurrentActivity")
-      .then(function (response: any) {
+    return this.request('getCurrentActivity')
+      .then((response: any) => {
         return response.result;
       });
   }
@@ -94,11 +98,11 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Retrieves a list with all available activities.
    */
-  getActivities(): Promise<HarmonyClient.ActivityDescription[]> {
-    debug("retrieve activities")
+  public async getActivities(): Promise<Array<HarmonyClient.ActivityDescription>> {
+    debug('retrieve activities');
 
     return this.getAvailableCommands()
-      .then(function (availableCommands: HarmonyClient.ConfigDescription) {
+      .then((availableCommands: HarmonyClient.ConfigDescription) => {
         return availableCommands.activity;
       });
   }
@@ -106,20 +110,21 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Starts an activity with the given id.
    */
-  startActivity(activityId): Promise<{}> {
-    var timestamp = new Date().getTime();
-    var body = "activityId=" + activityId + ":timestamp=" + timestamp;
+  public async startActivity(activityId): Promise<{}> {
+    const timestamp = new Date().getTime(),
+          body = `activityId=${activityId}:timestamp=${timestamp}`;
 
-    return this.request("startactivity", body, "encoded", (stanza) => {
+    return this.request('startactivity', body, 'encoded', (stanza: any) => {
       // This canHandleStanzaFn waits for a stanza that confirms starting the activity.
-      var event = stanza.getChild("event"),
-          canHandleStanza = false;
+      const event = stanza.getChild('event');
+      let canHandleStanza = false;
 
-      if (event && event.attr("type") === "connect.stateDigest?notify") {
-        var digest = JSON.parse(event.getText());
-        if (activityId === "-1" && digest.activityId === activityId && digest.activityStatus === 0) {
+      if (event && event.attr('type') === 'connect.stateDigest?notify') {
+        const digest = JSON.parse(event.getText());
+        if (activityId === '-1' && digest.activityId === activityId && digest.activityStatus === 0) {
           canHandleStanza = true;
-        } else if (activityId !== "-1" && digest.activityId === activityId && digest.activityStatus === 2) {
+        }
+        else if (activityId !== '-1' && digest.activityId === activityId && digest.activityStatus === 2) {
           canHandleStanza = true;
         }
       }
@@ -130,22 +135,22 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Turns the currently running activity off. This is implemented by "starting" an imaginary activity with the id -1.
    */
-  turnOff(): Promise<{}> {
-    debug("turn off");
-    return this.startActivity("-1");
+  public async turnOff(): Promise<{}> {
+    debug('turn off');
+    return this.startActivity('-1');
   }
 
   /**
    * Checks if the hub has now activity turned on. This is implemented by checking the hubs current activity. If the
    * activities id is equal to -1, no activity is on currently.
    */
-  isOff(): Promise<boolean> {
-    debug("check if turned off");
+  public async isOff(): Promise<boolean> {
+    debug('check if turned off');
 
     return this.getCurrentActivity()
-      .then(function (activityId) {
-        var off = (activityId === "-1");
-        debug(off ? "system is currently off" : "system is currently on with activity " + activityId);
+      .then((activityId) => {
+        const off = (activityId === '-1');
+        debug(off ? 'system is currently off' : 'system is currently on with activity ' + activityId);
 
         return off;
       });
@@ -154,11 +159,11 @@ export class HarmonyClient extends EventEmitter {
   /**
    * Acquires all available commands from the hub when resolving the returned promise.
    */
-  getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
-    debug("retrieve available commands");
+  public async getAvailableCommands(): Promise<HarmonyClient.ConfigDescription> {
+    debug('retrieve available commands');
 
-    return this.request("config", undefined, "json")
-      .then((response:HarmonyClient.ConfigDescription) => {
+    return this.request('config', undefined, 'json')
+      .then((response: HarmonyClient.ConfigDescription) => {
         return response;
       });
   }
@@ -171,18 +176,18 @@ export class HarmonyClient extends EventEmitter {
    * @returns {Stanza}
    */
   private buildCommandIqStanza(command: string, body: string) {
-    debug("buildCommandIqStanza for command '" + command + "' with body " + body);
+    debug(`buildCommandIqStanza for command '${command}' with body ${body}`);
 
     return xmppUtil.buildIqStanza(
-      "get"
-      , "connect.logitech.com"
-      , "vnd.logitech.harmony/vnd.logitech.harmony.engine?" + command
-      , body
+      'get',
+      'connect.logitech.com',
+      'vnd.logitech.harmony/vnd.logitech.harmony.engine?' + command,
+      body
     );
   }
 
-  private defaultCanHandleStanzaPredicate(awaitedId: string, stanza) {
-    var stanzaId = stanza.attr("id");
+  private defaultCanHandleStanzaPredicate(awaitedId: string, stanza: any) {
+    const stanzaId: string = stanza.attr('id');
     return (stanzaId && stanzaId.toString() === awaitedId.toString());
   }
 
@@ -202,45 +207,42 @@ export class HarmonyClient extends EventEmitter {
    * @param expectedResponseType
    * @param canHandleStanzaPredicate
    */
-  private request(command: string, body?: string, expectedResponseType?: string, canHandleStanzaPredicate?: (string) => boolean): Promise<{}> {
-    debug("request with command '" + command + "' with body " + body);
-    
-    var resolveCallback, rejectCallback, prom = new Promise((resolve, reject) => {
+  private request(command: string, body?: string,
+                  expectedResponseType?: string, canHandleStanzaPredicate?: (stanza: string) => boolean): Promise<{}> {
+    debug(`request with command '${command}' with body ${body}`);
+
+    return new Promise((resolveCallback, rejectCallback) => {
       const iq = this.buildCommandIqStanza(command, body),
-            id: string = iq.attr("id");
+            id: string = iq.attr('id');
 
-      expectedResponseType = expectedResponseType || "encoded";
-      canHandleStanzaPredicate = canHandleStanzaPredicate || (stanza => this.defaultCanHandleStanzaPredicate(id, stanza));
+      expectedResponseType = expectedResponseType || 'encoded';
+      canHandleStanzaPredicate =
+        canHandleStanzaPredicate || ((stanza) => this.defaultCanHandleStanzaPredicate(id, stanza));
 
-      resolveCallback = resolve;
-      rejectCallback = reject;
-      
+      this.responseHandlerQueue.push({
+        canHandleStanza: canHandleStanzaPredicate,
+        resolveCallback,
+        rejectCallback,
+        responseType: expectedResponseType
+      });
+
       // setImmediate
-      this._xmppClient.send(iq);
+      this.xmppClient.send(iq);
     });
-
-    this._responseHandlerQueue.push({
-      canHandleStanza: canHandleStanzaPredicate,
-      resolveCallback,
-      rejectCallback,
-      responseType: expectedResponseType
-    });
-
-    return prom;
   }
 
   /**
    * Sends a command with given body to the hub. The returned promise gets resolved
    * with a generic hub response without any content or error (eg. device not existing).
    */
-  send(action: string, body: string | {command: string, deviceId: string, type?:string}): Promise<{}> {
-    debug("send command '" + action + "' with body " + body);
-    
-    var simpleAcknowledge = stanza => {
-      return stanza.getChild("oa") === undefined;
+  public async send(action: string, body: string | {command: string, deviceId: string, type?: string}): Promise<{}> {
+    debug(`send command '${action}' with body ${body}`);
+
+    const simpleAcknowledge = (stanza) => {
+      return stanza.getChild('oa') === undefined;
     };
 
-    if (typeof body == "string") {
+    if (typeof body === 'string') {
       return this.request(action, body, undefined, simpleAcknowledge);
     }
     else if (body && body.command && body.deviceId) {
@@ -250,7 +252,8 @@ export class HarmonyClient extends EventEmitter {
     }
     else {
       return Promise.reject(
-        "With the send command you need to provide a body parameter which can be a string or {command: string, deviceId: string, type?:string}"
+        'With the send command you need to provide a body parameter which can be ' +
+        'a string or {command: string, deviceId: string, type?:string}'
       );
     }
   }
@@ -259,15 +262,17 @@ export class HarmonyClient extends EventEmitter {
    * Closes the connection the the hub. You have to create a new client if you would like
    * to communicate again with the hub.
    */
-  end() {
-    debug("close harmony client");
-    this._xmppClient.end();
+  public end() {
+    debug('close harmony client');
+    this.xmppClient.end();
   }
 }
 
 export namespace HarmonyClient {
   export enum Events {
-    STATE_DIGEST = "stateDigest"
+    STATE_DIGEST = 'stateDigest',
+    CONNECTED = 'open',
+    DISCONNECTED = 'close'
   }
 
   export class ConfigDescription {
@@ -328,6 +333,7 @@ export namespace HarmonyClient {
   }
 
   export class PowerAction {
+    // tslint:disable-next-line:variable-name
     __type: string;
     IRCommandName: string;
     Order: number;
@@ -337,10 +343,10 @@ export namespace HarmonyClient {
 
   export class ControlGroup {
     name: string;
-    function: Array<Function>;
+    function: Array<FunctionObj>;
   }
 
-  export class Function {
+  export class FunctionObj {
     action: string;
     name: string;
     label: string;
@@ -349,6 +355,31 @@ export namespace HarmonyClient {
   export class StateDigest {
     activityId: string;
     activityStatus: StateDigestStatus;
+
+    sleepTimerId: number;
+    runningZoneList: Array<{}>;
+    contentVersion: number;
+    errorCode: ERROR_CODE;
+    syncStatus: number;
+    time: number;
+    stateVersion: number;
+    tzoffset: string;
+    tzOffset: string;
+    mode: number;
+    hubSwVersion: string;
+    deviceSetupState: Array<{}>;
+    isSetupComplete: boolean;
+    configVersion: number;
+    sequence: boolean;
+    discoveryServer: string;
+    discoveryServerCF: string;
+    updates: any;
+    wifiStatus: number;
+    tz: string;
+    activitySetupState: boolean;
+    runningActivityList: string;
+    hubUpdate: boolean;
+    accountId: string;
   }
 
   export enum StateDigestStatus {
@@ -356,6 +387,10 @@ export namespace HarmonyClient {
     ACTIVITY_STARTING = 1,
     ACTIVITY_STARTED = 2,
     HUB_TURNING_OFF = 3
+  }
+
+  export enum ERROR_CODE {
+    OK = '200'
   }
 }
 

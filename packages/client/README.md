@@ -10,7 +10,7 @@ Which was based upon [@jterraces](https://github.com/jterrace) awesome Harmony
 
 ## Installation
 ```bash
-npm install @harmonyhub/client --save
+npm install @harmonyhub/client
 ```
 
 ## Enhancements
@@ -24,34 +24,30 @@ Enhancements over the harmonyhubjs-client package are the following
 
 ## Usage
 ```javascript
-var harmony = require('@harmonyhub/client').getHarmonyClient;
+import { getHarmonyClient } from '@harmonyhub/client';
 
-harmony('192.168.1.200')
-  .then(function(harmonyClient) {
-    harmonyClient.isOff()
-      .then(function(off) {
-        if(off) {
-          console.log('Currently off. Turning TV on.');
+async function run(): Promise<void> {
+  const harmonyClient = await getHarmonyClient('192.168.0.31');
 
-          harmonyClient.getActivities()
-            .then(function(activities) {
-              activities.some(function(activity) {
-                if(activity.label === 'Watch TV') {
-                  var id = activity.id
-                  harmonyClient.startActivity(id)
-                  harmonyClient.end()
-                  return true
-                }
-                return false
-              })
-            });
-        } else {
-          console.log('Currently on. Turning TV off');
-          harmonyClient.turnOff();
-          harmonyClient.end();
-        }
-      })
-  });
+  const encodedAction = `{"command"::"VolumeUp","type"::"IRCommand","deviceId"::"27633596"}`;
+  const dt_press = `action=${encodedAction}:status=press`;
+  const dt_release = `action=${encodedAction}:status=release`;
+
+  try {
+    const commands = await harmonyClient.getAvailableCommands();
+    console.log('commands', commands);
+    await harmonyClient.send('holdAction', dt_press);
+    await harmonyClient.send('holdAction', dt_release);
+    
+    harmonyClient.end();
+  } catch(error) {
+    console.error('Error', error.message);
+  }
+}
+
+run().catch(
+  err => console.log(err)
+);
 ```
 
 This example connects to a Harmony hub available on the IP `192.168.1.200`. As soon as the the connection is established, `isOff()` checks if the equipment is turned off. If off, the activity with the name `Watch TV` is started. If on, all devices are turned off.
@@ -60,5 +56,5 @@ This example connects to a Harmony hub available on the IP `192.168.1.200`. As s
 `@harmonyhub/client` uses [debug](https://github.com/visionmedia/debug) for generating traces throughout its execution time. Activate them by setting the `DEBUG` environment variable:
 
 ```bash
-$ DEBUG=harmonyhub:client* node myharmonyjsapp.js
+$ DEBUG=harmonyhub:client* node example.js
 ```
