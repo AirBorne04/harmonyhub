@@ -27,12 +27,12 @@ const util_1 = require("./util");
 let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.EventEmitter {
     constructor(xmppClient) {
         super();
+        this.responseHandlerQueue = [];
         debug('create new harmony client');
         this.xmppClient = xmppClient;
-        this.responseHandlerQueue = [];
         this.emit(HarmonyClient_1.Events.CONNECTED);
         xmppClient.on('stanza', this.handleStanza);
-        xmppClient.on('close', this.emit(HarmonyClient_1.Events.DISCONNECTED));
+        xmppClient.on('close', () => this.emit(HarmonyClient_1.Events.DISCONNECTED));
         xmppClient.on('error', (error) => {
             debug('XMPP Error: ' + error.message);
         });
@@ -50,7 +50,7 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                 debug('received response stanza for queued response handler');
                 const response = stanza.getChildText('oa'), oa = stanza.getChild('oa');
                 let decodedResponse;
-                if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode !== 200) {
+                if (oa && oa.attrs && oa.attrs.errorcode && parseInt(oa.attrs.errorcode, 10) !== 200) {
                     responseHandler.rejectCallback({
                         code: oa.attrs.errorcode,
                         message: oa.attrs.errorstring
@@ -194,9 +194,9 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
      * @param canHandleStanzaPredicate
      */
     request(command, body, expectedResponseType, canHandleStanzaPredicate) {
-        debug(`request with command '${command}' with body ${body}`);
         return new Promise((resolveCallback, rejectCallback) => {
             const iq = this.buildCommandIqStanza(command, body), id = iq.attr('id');
+            debug(`request with command '${command}' with body ${body} and id ${id}`);
             expectedResponseType = expectedResponseType || 'encoded';
             canHandleStanzaPredicate =
                 canHandleStanzaPredicate || ((stanza) => this.defaultCanHandleStanzaPredicate(id, stanza));

@@ -30,28 +30,32 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
         return __awaiter(this, void 0, void 0, function* () {
             debug('connect to harmony hub');
             // use the provided remoteId or get it from the hub
-            this.remoteId = remoteId || (yield this._getRemoteId(hubip)).body.data.removeId;
+            this.remoteId = remoteId || (yield this._getRemoteId(hubip)).body.data.remoteId
+                || (yield this._getRemoteId(hubip)).body.data.activeRemoteId;
             return this._connect(hubip);
         });
     }
     _getRemoteId(hubip) {
-        const payload = {
-            url: 'http://' + hubip + ':8088',
-            method: 'POST',
-            timeout: 10000,
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'text/plain',
-                'Origin': 'http//:localhost.nebula.myharmony.com'
-            },
-            json: true,
-            body: {
-                id: 0,
-                cmd: 'connect.discoveryinfo?get',
-                params: {}
-            }
-        };
-        return got(payload);
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = {
+                url: 'http://' + hubip + ':8088/',
+                method: 'POST',
+                timeout: 10000,
+                headers: {
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json',
+                    'Accept-Charset': 'utf-8',
+                    'Origin': 'http://sl.dhg.myharmony.com' // this is new in firmware 4.10.250
+                },
+                json: true,
+                body: {
+                    id: 124,
+                    cmd: 'setup.account?getProvisionInfo',
+                    params: {}
+                }
+            };
+            return got(payload);
+        });
     }
     _connect(hubip) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -71,6 +75,11 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                 clearInterval(this.heartbeatInterval);
                 this.emit(HarmonyClient_1.Events.DISCONNECTED);
             });
+            this.wsClient.onOpen.addListener(() => {
+                clearInterval(this.heartbeatInterval);
+                this.heartbeatInterval = setInterval(() => this.wsClient.send(''), 55000);
+                this.emit(HarmonyClient_1.Events.CONNECTED);
+            });
             const payload = {
                 hubId: this.remoteId,
                 timeout: 30,
@@ -84,10 +93,8 @@ let HarmonyClient = HarmonyClient_1 = class HarmonyClient extends events_1.Event
                 }
             };
             return this.wsClient.open()
-                .then(() => this.heartbeatInterval = setInterval(() => this.wsClient.send(''), 55000))
                 .then(() => this.wsClient.onUnpackedMessage.addListener(this._onMessage))
-                .then(() => this.wsClient.sendPacked(payload))
-                .then(() => this.emit(HarmonyClient_1.Events.CONNECTED));
+                .then(() => this.wsClient.sendPacked(payload));
         });
     }
     _onMessage(message) {
