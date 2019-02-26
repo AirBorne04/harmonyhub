@@ -6,7 +6,7 @@ import { loginToHub } from './hub';
 /** Function: login
  * Retrieves a UserAuthToken using a guest Harmony account and logs into a
  * local Harmony hub. If everything runs fine, the returned promise resolves by
- * passing a logged in XMPP client which provides communication to the Hamrony
+ * passing a logged in XMPP client which provides communication to the Harmony
  * hub.
  */
 export function login(hubhost: string, hubport?: number): Promise<{}> {

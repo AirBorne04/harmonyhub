@@ -14,20 +14,17 @@ import { default as xmppUtil } from './util';
 export class HarmonyClient extends EventEmitter {
 
   private xmppClient: any;
-  private responseHandlerQueue: Array<any>;
+  private responseHandlerQueue: Array<any> = [];
 
   constructor(xmppClient) {
     super();
 
     debug('create new harmony client');
-
     this.xmppClient = xmppClient;
-    this.responseHandlerQueue = [];
-
     this.emit(HarmonyClient.Events.CONNECTED);
 
     xmppClient.on('stanza', this.handleStanza);
-    xmppClient.on('close', this.emit(HarmonyClient.Events.DISCONNECTED));
+    xmppClient.on('close', () => this.emit(HarmonyClient.Events.DISCONNECTED));
     xmppClient.on('error', (error) => {
       debug('XMPP Error: ' + error.message);
     });
@@ -52,7 +49,7 @@ export class HarmonyClient extends EventEmitter {
 
         let decodedResponse;
 
-        if (oa && oa.attrs && oa.attrs.errorcode && oa.attrs.errorcode !== 200) {
+        if (oa && oa.attrs && oa.attrs.errorcode && parseInt(oa.attrs.errorcode, 10) !== 200) {
           responseHandler.rejectCallback({
             code: oa.attrs.errorcode,
             message: oa.attrs.errorstring
@@ -209,12 +206,11 @@ export class HarmonyClient extends EventEmitter {
    */
   private request(command: string, body?: string,
                   expectedResponseType?: string, canHandleStanzaPredicate?: (stanza: string) => boolean): Promise<{}> {
-    debug(`request with command '${command}' with body ${body}`);
-
     return new Promise((resolveCallback, rejectCallback) => {
       const iq = this.buildCommandIqStanza(command, body),
             id: string = iq.attr('id');
 
+      debug(`request with command '${command}' with body ${body} and id ${id}`);
       expectedResponseType = expectedResponseType || 'encoded';
       canHandleStanzaPredicate =
         canHandleStanzaPredicate || ((stanza) => this.defaultCanHandleStanzaPredicate(id, stanza));

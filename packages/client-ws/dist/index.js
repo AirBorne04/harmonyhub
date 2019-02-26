@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const harmonyclient_1 = require("./harmonyclient");
 var harmonyclient_2 = require("./harmonyclient");
 exports.HarmonyClient = harmonyclient_2.HarmonyClient;
-function getHarmonyClient(hubhost, options) {
+function getHarmonyClient(hubhost, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         // map a pure number to the options object
         if (typeof options === 'number') {

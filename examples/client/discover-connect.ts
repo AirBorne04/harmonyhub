@@ -1,4 +1,4 @@
-import { getHarmonyClient, HarmonyClient } from '@harmonyhub/client-ws';
+import { getHarmonyClient, HarmonyClient } from '@harmonyhub/client';
 import { Explorer, HubData } from '@harmonyhub/discover';
 
 async function run(): Promise<void> {
@@ -22,15 +22,12 @@ async function run(): Promise<void> {
 }
 
 const hubConnections = new Map<string, HarmonyClient>();
+
 async function connectToHub(data: HubData) {
   if (hubConnections.get(data.uuid) === undefined) {
-    // with the websocket client the port is irrelevant
-    // and can be discarded, but for 100% api compatibility
-    // with the @harmonyhub/client xmpp version of this
-    // library it doesn't hurt to keep it
-    // passing in the remoteId saves one data request to the
-    // hub which the library performs automatically when the
-    // remoteId is not provided
+    // with the xmpp client the remoteId is not really needed,
+    // the port would fallback to the default, but better use
+    // what the hub is reporting
     const hubclient = await getHarmonyClient(data.ip, {
       port: parseInt(data.fullHubInfo.port, 10),
       remoteId: data.fullHubInfo.remoteId

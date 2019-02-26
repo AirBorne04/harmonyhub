@@ -57,7 +57,6 @@ async function run2(): Promise<void> {
   } catch (error) {
     console.error('Error', error.message);
   }
-
 }
 
 /**

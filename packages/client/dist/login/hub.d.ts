@@ -4,5 +4,5 @@
  * The returned promise will pass a fully authenticated XMPP client
  * which can be used to communicate with the Harmony hub.
  */
-export declare function loginToHub(hubhost: string, hubport: number): Promise<{}>;
+export declare function loginToHub(hubhost: string, hubport?: number): Promise<{}>;
 export default loginToHub;

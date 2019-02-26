@@ -137,10 +137,8 @@ function loginWithIdentity(identity: string, hubhost: string, hubport: number): 
  * The returned promise will pass a fully authenticated XMPP client
  * which can be used to communicate with the Harmony hub.
  */
-export function loginToHub(hubhost: string, hubport: number): Promise<{}> {
+export function loginToHub(hubhost: string, hubport?: number): Promise<{}> {
   debug('perform hub login');
-
-  hubport = hubport || 5222;
 
   return getIdentity(hubhost, hubport)
     .then((identity) => {

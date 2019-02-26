@@ -20,15 +20,14 @@ async function run(): Promise<void> {
 }
 
 async function run1(): Promise<void> {
-  const harmonyClient = await getHarmonyClient('192.168.0.30');
+  const harmonyClient = await getHarmonyClient('192.168.0.102');
 
-  const commands = await harmonyClient.getAvailableCommands();
+  const commands = await harmonyClient.getAvailableCommands(),
+        tvs = commands.device.filter(
+          (device) => device.type === 'Television'
+        );
 
-  const tvs = commands.device.filter(
-    (device) => device.type === 'Tv'
-  );
-
-  console.log(tvs);
+  console.log('televisions found #' + tvs.length);
   return Promise.resolve();
 }
 

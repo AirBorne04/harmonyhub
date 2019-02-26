@@ -22,25 +22,27 @@ export class HarmonyClient extends EventEmitter {
   public async connect(hubip: string, remoteId?: string) {
     debug('connect to harmony hub');
     // use the provided remoteId or get it from the hub
-    this.remoteId = remoteId || (await this._getRemoteId(hubip)).body.data.removeId;
+    this.remoteId = remoteId || (await this._getRemoteId(hubip)).body.data.remoteId
+      || (await this._getRemoteId(hubip)).body.data.activeRemoteId;
     return this._connect(hubip);
   }
 
-  private _getRemoteId(hubip: string) {
+  private async _getRemoteId(hubip: string) {
 
     const payload = {
-      url: 'http://' + hubip + ':8088',
+      url: 'http://' + hubip + ':8088/',
       method: 'POST',
       timeout: 10000,
       headers: {
         'Content-type': 'application/json',
-        'Accept': 'text/plain',
-        'Origin': 'http//:localhost.nebula.myharmony.com'
+        'Accept': 'application/json',
+        'Accept-Charset': 'utf-8',
+        'Origin': 'http://sl.dhg.myharmony.com' // this is new in firmware 4.10.250
       },
       json: true,
       body: {
-        id: 0,
-        cmd: 'connect.discoveryinfo?get',
+        id: 124,
+        cmd: 'setup.account?getProvisionInfo',
         params: {}
       }
     };
@@ -69,6 +71,12 @@ export class HarmonyClient extends EventEmitter {
       this.emit(HarmonyClient.Events.DISCONNECTED);
     });
 
+    this.wsClient.onOpen.addListener(() => {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = setInterval(() => this.wsClient.send(''), 55000)
+      this.emit(HarmonyClient.Events.CONNECTED);
+    });
+
     const payload = {
       hubId: this.remoteId,
       timeout: 30,
@@ -83,10 +91,8 @@ export class HarmonyClient extends EventEmitter {
     };
 
     return this.wsClient.open()
-      .then(() => this.heartbeatInterval = setInterval(() => this.wsClient.send(''), 55000))
       .then(() => this.wsClient.onUnpackedMessage.addListener(this._onMessage))
-      .then(() => this.wsClient.sendPacked(payload))
-      .then(() => this.emit(HarmonyClient.Events.CONNECTED));
+      .then(() => this.wsClient.sendPacked(payload));
   }
 
   _onMessage(message) {

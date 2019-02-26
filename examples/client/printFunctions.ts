@@ -1,4 +1,4 @@
-import { HarmonyClient } from '@harmonyhub/client-ws';
+import { HarmonyClient } from '@harmonyhub/client';
 import { HubReporter } from './setup';
 
 const hubReporter = new HubReporter();

@@ -1,29 +1,17 @@
-import { getHarmonyClient, HarmonyClient } from '@harmonyhub/client-ws';
+import { HarmonyClient } from '@harmonyhub/client-ws';
+import { HubReporter } from './setup';
 
-const hubIp = '192.168.0.30';
+const hubReporter = new HubReporter();
 
-async function run() {
-  const harmonyClient = await getHarmonyClient(hubIp);
-
-  try {
-    // register state digest
-    harmonyClient.on(HarmonyClient.Events.STATE_DIGEST,
-      (digest: HarmonyClient.StateDigest) => {
-        console.log(digest);
-        console.log(
-          `activity -> ${digest.activityId} is -> ${digest.activityStatus}`
-        );
-      }
+hubReporter.on(
+  HarmonyClient.Events.STATE_DIGEST, (evt: { hubclient: HarmonyClient, digest: HarmonyClient.StateDigest }) => {
+    console.log(evt.digest);
+    console.log(
+      `activity -> ${evt.digest.activityId} is -> ${evt.digest.activityStatus}`
     );
-  } catch (error) {
-    console.error(`Error ${error.message}`);
   }
-
-  console.log(
-    `listening for state digest from harmony hub on ${hubIp}.`
-  );
-}
-
-run().catch(
-  (err) => console.log(err)
 );
+
+hubReporter.start();
+console.log('listening for 30 seconds to retrieve hub infos from the network');
+setTimeout( () => hubReporter.stop(), 30 * 1000 );

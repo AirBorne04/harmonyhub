@@ -1,6 +1,6 @@
 {
   "name": "harmonyhub",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "library for interacting with the harmony hub",
   "main": "index.js",
   "dependencies": {
@@ -10,11 +10,11 @@
     "@xmpp/client": "^0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.18",
+    "@types/node": "^10.12.27",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0",
-    "tslint": "^5.12.1",
-    "typescript": "^3.1.6"
+    "mocha": "^6.0.2",
+    "tslint": "^5.13.0",
+    "typescript": "^3.3.3333"
   },
   "scripts": {
     "test": "npm run build && mocha",
@@ -28,7 +28,7 @@
     "build:all": "(npm run build:client) && (npm run build:client-ws) && (npm run build:discover) && (npm run build:examples)",
     "post:merge:master": "git rebase --onto origin/master HEAD && git push origin develop -f",
     "build": "npm run build:discover && npm run build:client && npm run build:examples",
-    "postinstall": "(cd packages/client/ && npm install) && (cd packages/client-ws/ && npm install) && (cd packages/discover/ && npm install)",
+    "postinstall": "(cd packages/client/ && npm install) && (cd ../client-ws/ && npm install) && (cd ../discover/ && npm install)",
     "lint": "tslint -c tslint.json '**/*.ts'"
   },
   "_moduleAliases": {
@@ -43,6 +43,7 @@
     "harmonyhub",
     "api",
     "xmpp",
+    "websocket",
     "discover",
     "home automation"
   ],

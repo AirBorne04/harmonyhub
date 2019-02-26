@@ -12,7 +12,7 @@ const login_1 = require("./login");
 const harmonyclient_1 = require("./harmonyclient");
 var harmonyclient_2 = require("./harmonyclient");
 exports.HarmonyClient = harmonyclient_2.HarmonyClient;
-function getHarmonyClient(hubhost, options) {
+function getHarmonyClient(hubhost, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         // map a pure number to the options object
         if (typeof options === 'number') {
@@ -20,7 +20,7 @@ function getHarmonyClient(hubhost, options) {
                 port: options
             };
         }
-        // the xmpp client does not require a remoteId?
+        // the xmpp client does not require a remoteId! or port! it will fallback to 5222
         const xmppClient = yield login_1.login(hubhost, options.port);
         return new harmonyclient_1.HarmonyClient(xmppClient);
     });

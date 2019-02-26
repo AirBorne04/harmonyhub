@@ -113,7 +113,6 @@ function loginWithIdentity(identity, hubhost, hubport) {
  */
 function loginToHub(hubhost, hubport) {
     debug('perform hub login');
-    hubport = hubport || 5222;
     return getIdentity(hubhost, hubport)
         .then((identity) => {
         debug('first step is done now login with identity');
