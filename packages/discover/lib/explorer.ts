@@ -78,16 +78,28 @@ export class Explorer extends EventEmitter {
 
   responseCollector: ResponseCollector;
   cleanUpIntervalToken: NodeJS.Timer;
+  cleanUpTimeout: number;
 
   /**
    * @param incomingPort The port on the current client to use when pinging.
    * If unspecified using any port available.
    * @param pingOptions Defines the broadcasting details for this explorer.
+   * @param cleanUpTimeout The interval that the hub does not respond to be
+   * considerd offline, but minimal 2 * ping interval + 2500 ms, default 5000 ms
    */
-  constructor(incomingPort: number = 5222, pingOptions?: PingOptions) {
+  constructor(incomingPort: number = 5222,
+              pingOptions?: PingOptions,
+              cleanUpTimeout: number = 5000) {
     super();
 
     this.port = incomingPort;
+
+    if (pingOptions && pingOptions.interval) {
+      this.cleanUpTimeout = Math.max(cleanUpTimeout, pingOptions.interval * 2 + 2500);
+    }
+    else {
+      this.cleanUpTimeout = cleanUpTimeout;
+    }
 
     debug(`Explorer(${this.port})`);
 
@@ -102,7 +114,7 @@ export class Explorer extends EventEmitter {
 
     this.responseCollector = new ResponseCollector(this.port);
     this.responseCollector.on(ResponseCollector.Events.RESPONSE, this.handleResponse);
-    this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 7000);
+    this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 2000);
 
     this.responseCollector.start();
     this.ping.start();
@@ -148,7 +160,7 @@ export class Explorer extends EventEmitter {
 
     Array.from(this.knownHubs.values()).forEach((hub: IHubData) => {
       const diff = now - hub.lastSeen;
-      if (diff > 5000) {
+      if (diff > this.cleanUpTimeout) {
         debug(`hub at ${hub.ip} seen last ${diff}ms ago. clean up and tell subscribers that we lost that one.`);
         this.knownHubs.delete(hub.uuid);
         this.emit(Explorer.Events.OFFLINE, hub);
