@@ -42,12 +42,15 @@ export declare class Explorer extends EventEmitter {
     ping: Ping;
     responseCollector: ResponseCollector;
     cleanUpIntervalToken: NodeJS.Timer;
+    cleanUpTimeout: number;
     /**
      * @param incomingPort The port on the current client to use when pinging.
      * If unspecified using any port available.
      * @param pingOptions Defines the broadcasting details for this explorer.
+     * @param cleanUpTimeout The interval that the hub does not respond to be
+     * considerd offline, but minimal 2 * ping interval + 2500 ms, default 5000 ms
      */
-    constructor(incomingPort?: number, pingOptions?: PingOptions);
+    constructor(incomingPort?: number, pingOptions?: PingOptions, cleanUpTimeout?: number);
     /**
      * Inits the listening for hub replies, and starts broadcasting.
      */

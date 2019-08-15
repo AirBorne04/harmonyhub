@@ -57,7 +57,7 @@ let Ping = class Ping {
         this.portToAnnounce = portToAnnounce;
         // init the welcome messages
         this.message = `_logitech-reverse-bonjour._tcp.local.\n${portToAnnounce}`;
-        this.messageBuffer = new Buffer(this.message);
+        this.messageBuffer = Buffer.from(this.message);
     }
     /**
      * emit a broadcast into the network.

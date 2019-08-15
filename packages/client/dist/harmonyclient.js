@@ -13,8 +13,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var HarmonyClient_1;
+Object.defineProperty(exports, "__esModule", { value: true });
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 const debug = logger('harmonyhub:client:harmonyclient');
