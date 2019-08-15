@@ -10,11 +10,11 @@
     "@xmpp/client": "^0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.30",
+    "@types/node": "^10.14.15",
     "chai": "^4.2.0",
-    "mocha": "^6.0.2",
-    "tslint": "^5.13.1",
-    "typescript": "^3.3.3333"
+    "mocha": "^6.2.0",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
   },
   "scripts": {
     "test": "npm run build && mocha",

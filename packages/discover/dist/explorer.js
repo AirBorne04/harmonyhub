@@ -5,8 +5,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var Explorer_1;
+Object.defineProperty(exports, "__esModule", { value: true });
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 const debug = logger('harmonyhub:discover:explorer');
@@ -36,11 +36,19 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
      * @param incomingPort The port on the current client to use when pinging.
      * If unspecified using any port available.
      * @param pingOptions Defines the broadcasting details for this explorer.
+     * @param cleanUpTimeout The interval that the hub does not respond to be
+     * considerd offline, but minimal 2 * ping interval + 2500 ms, default 5000 ms
      */
-    constructor(incomingPort = 5222, pingOptions) {
+    constructor(incomingPort = 5222, pingOptions, cleanUpTimeout = 5000) {
         super();
         this.knownHubs = new Map();
         this.port = incomingPort;
+        if (pingOptions && pingOptions.interval) {
+            this.cleanUpTimeout = Math.max(cleanUpTimeout, pingOptions.interval * 2 + 2500);
+        }
+        else {
+            this.cleanUpTimeout = cleanUpTimeout;
+        }
         debug(`Explorer(${this.port})`);
         this.ping = new ping_1.Ping(this.port, pingOptions);
     }
@@ -51,7 +59,7 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
         debug('start()');
         this.responseCollector = new responseCollector_1.ResponseCollector(this.port);
         this.responseCollector.on(responseCollector_1.ResponseCollector.Events.RESPONSE, this.handleResponse);
-        this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 7000);
+        this.cleanUpIntervalToken = setInterval(this.executeCleanUp, 2000);
         this.responseCollector.start();
         this.ping.start();
     }
@@ -90,7 +98,7 @@ let Explorer = Explorer_1 = class Explorer extends events_1.EventEmitter {
         const now = Date.now();
         Array.from(this.knownHubs.values()).forEach((hub) => {
             const diff = now - hub.lastSeen;
-            if (diff > 5000) {
+            if (diff > this.cleanUpTimeout) {
                 debug(`hub at ${hub.ip} seen last ${diff}ms ago. clean up and tell subscribers that we lost that one.`);
                 this.knownHubs.delete(hub.uuid);
                 this.emit(Explorer_1.Events.OFFLINE, hub);
