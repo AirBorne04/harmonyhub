@@ -225,7 +225,7 @@ export class HarmonyClient extends EventEmitter {
    * @param commandTimeframe the time when to send a release message
    */
   public async send(action: string, body: string | {command: string, deviceId: string, type?: string},
-                    commandTimeframe = 0): Promise<{}> {
+                    commandTimeframe = 0): Promise<unknown> {
     let encodedAction;
     if (typeof body === 'string') {
       encodedAction = body;
@@ -270,7 +270,7 @@ export class HarmonyClient extends EventEmitter {
 
     this.wsClient.sendPacked(payloadPress);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (commandTimeframe > 0) {
         setTimeout(
           () => {

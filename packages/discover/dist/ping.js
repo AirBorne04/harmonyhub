@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Ping = exports.PingOptions = void 0;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 const debug = logger('harmonyhub:discover:ping');

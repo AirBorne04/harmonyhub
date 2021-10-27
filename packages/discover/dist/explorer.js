@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var Explorer_1;
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Explorer = void 0;
 const autobind_decorator_1 = require("autobind-decorator");
 const logger = require("debug");
 const debug = logger('harmonyhub:discover:explorer');
