@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.loginToHub = void 0;
 const logger = require("debug");
 const debug = logger('harmonyhub:client:login:hub');
 const node_xmpp_client_1 = require("node-xmpp-client");

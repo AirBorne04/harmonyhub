@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.login = void 0;
 const logger = require("debug");
 const debug = logger('harmonyhub:client:login');
 const hub_1 = require("./hub");
@@ -11,7 +12,7 @@ const hub_1 = require("./hub");
  */
 function login(hubhost, hubport) {
     debug('login on hub ' + hubhost + (hubport ? ':' + hubport : ''));
-    return hub_1.loginToHub(hubhost, hubport);
+    return (0, hub_1.loginToHub)(hubhost, hubport);
 }
 exports.login = login;
 exports.default = login;
